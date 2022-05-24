@@ -1,0 +1,47 @@
+{
+    "version": 1,
+    "minor_version": 1,
+    "key": "core.restore_state",
+    "data": [
+        {
+            "state": {
+                "entity_id": "person.tanigawa",
+                "state": "unknown",
+                "attributes": {
+                    "editable": false,
+                    "id": "tanigawa",
+                    "user_id": "a7b2ecf6fb32483699b0f1b0114c42f7",
+                    "friendly_name": "tanigawa"
+                },
+                "last_changed": "2022-05-24T13:11:30.860235+00:00",
+                "last_updated": "2022-05-24T13:11:36.986356+00:00",
+                "context": {
+                    "id": "0180f631bf1a56a035262e3f206f85fd",
+                    "parent_id": null,
+                    "user_id": null
+                }
+            },
+            "extra_data": null,
+            "last_seen": "2022-05-24T13:22:00.214102+00:00"
+        },
+        {
+            "state": {
+                "entity_id": "button.sdg_reboot",
+                "state": "unknown",
+                "attributes": {
+                    "device_class": "restart",
+                    "friendly_name": "sdg Reboot"
+                },
+                "last_changed": "2022-05-24T13:11:36.939901+00:00",
+                "last_updated": "2022-05-24T13:11:36.939901+00:00",
+                "context": {
+                    "id": "0180f631beeb928bcbeb8f42d9d932ca",
+                    "parent_id": null,
+                    "user_id": null
+                }
+            },
+            "extra_data": null,
+            "last_seen": "2022-05-24T13:22:00.214102+00:00"
+        }
+    ]
+}

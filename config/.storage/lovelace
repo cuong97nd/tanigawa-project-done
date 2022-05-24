@@ -1,0 +1,33 @@
+{
+    "version": 1,
+    "minor_version": 1,
+    "key": "lovelace",
+    "data": {
+        "config": {
+            "views": [
+                {
+                    "title": "Home",
+                    "cards": [
+                        {
+                            "type": "custom:webrtc-camera",
+                            "url": "rtsp://tanigawa:tanigawa@10.0.1.113:554/stream2",
+                            "mse": true,
+                            "webrtc": true,
+                            "ui": true,
+                            "ice_servers": [
+                                {
+                                    "urls": "stun:stun.l.google.com:19302"
+                                },
+                                {
+                                    "urls": "turn:118.27.118.210:3478",
+                                    "username": "a",
+                                    "credential": "a"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
