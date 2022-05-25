@@ -2,9 +2,10 @@ const Recorder = require('rtsp-video-recorder');
 const fs = require('fs');
 const RecorderEvents = Recorder.RecorderEvents
 const main = () => {
-  const recorder = new Recorder.Recorder('rtsp://tanigawa:tanigawa@10.0.1.113:554/stream1', './media', {
+  console.log(process.env);
+  const recorder = new Recorder.Recorder(process.env.URL, './media', {
     title: 'Test Camera',
-    segmentTime: 15,
+    segmentTime: process.env.SEGMENTTIME,
     filePattern: '%Y年%m月%d日%H時%M分%S秒',
     dirSizeThreshold: "50G"
   }).on(RecorderEvents.STARTED, (ev) => {
