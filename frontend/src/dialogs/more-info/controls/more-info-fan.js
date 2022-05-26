@@ -1,4 +1,3 @@
-import "@material/mwc-list/mwc-list-item";
 import "@polymer/iron-flex-layout/iron-flex-layout-classes";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
@@ -9,11 +8,12 @@ import "../../../components/ha-attributes";
 import "../../../components/ha-icon";
 import "../../../components/ha-icon-button";
 import "../../../components/ha-labeled-slider";
-import "../../../components/ha-select";
 import "../../../components/ha-switch";
 import { SUPPORT_SET_SPEED } from "../../../data/fan";
 import { EventsMixin } from "../../../mixins/events-mixin";
 import LocalizeMixin from "../../../mixins/localize-mixin";
+import "@material/mwc-list/mwc-list-item";
+import "@material/mwc-select/mwc-select";
 
 /*
  * @appliesMixin EventsMixin
@@ -35,10 +35,9 @@ class MoreInfoFan extends LocalizeMixin(EventsMixin(PolymerElement)) {
         .has-direction .container-direction,
         .has-oscillating .container-oscillating {
           display: block;
-          margin-top: 8px;
         }
 
-        ha-select {
+        mwc-select {
           width: 100%;
         }
       </style>
@@ -58,7 +57,7 @@ class MoreInfoFan extends LocalizeMixin(EventsMixin(PolymerElement)) {
         </div>
 
         <div class="container-preset_modes">
-          <ha-select
+          <mwc-select
             label="[[localize('ui.card.fan.preset_mode')]]"
             value="[[stateObj.attributes.preset_mode]]"
             on-selected="presetModeChanged"
@@ -72,7 +71,7 @@ class MoreInfoFan extends LocalizeMixin(EventsMixin(PolymerElement)) {
             >
               <mwc-list-item value="[[item]]">[[item]]</mwc-list-item>
             </template>
-          </ha-select>
+          </mwc-select>
         </div>
 
         <div class="container-oscillating">

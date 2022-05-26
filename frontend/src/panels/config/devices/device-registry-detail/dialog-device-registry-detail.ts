@@ -1,12 +1,13 @@
 import "@material/mwc-button/mwc-button";
+import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { fireEvent } from "../../../../common/dom/fire_event";
 import "../../../../components/ha-area-picker";
 import "../../../../components/ha-dialog";
 import type { HaSwitch } from "../../../../components/ha-switch";
-import "../../../../components/ha-textfield";
 import { computeDeviceName } from "../../../../data/device_registry";
+import { PolymerChangedEvent } from "../../../../polymer-types";
 import { haStyle, haStyleDialog } from "../../../../resources/styles";
 import { HomeAssistant } from "../../../../types";
 import { DeviceRegistryDetailDialogParams } from "./show-dialog-device-registry-detail";
@@ -56,18 +57,16 @@ class DialogDeviceRegistryDetail extends LitElement {
         .heading=${computeDeviceName(device, this.hass)}
       >
         <div>
-          ${this._error
-            ? html`<ha-alert alert-type="error">${this._error}</ha-alert> `
-            : ""}
+          ${this._error ? html` <div class="error">${this._error}</div> ` : ""}
           <div class="form">
-            <ha-textfield
+            <paper-input
               .value=${this._nameByUser}
-              @input=${this._nameChanged}
+              @value-changed=${this._nameChanged}
               .label=${this.hass.localize("ui.panel.config.devices.name")}
               .placeholder=${device.name || ""}
               .disabled=${this._submitting}
               dialogInitialFocus
-            ></ha-textfield>
+            ></paper-input>
             <ha-area-picker
               .hass=${this.hass}
               .value=${this._areaId}
@@ -133,9 +132,9 @@ class DialogDeviceRegistryDetail extends LitElement {
     `;
   }
 
-  private _nameChanged(ev): void {
+  private _nameChanged(ev: PolymerChangedEvent<string>): void {
     this._error = undefined;
-    this._nameByUser = ev.target.value;
+    this._nameByUser = ev.detail.value;
   }
 
   private _areaPicked(event: CustomEvent): void {
@@ -175,9 +174,8 @@ class DialogDeviceRegistryDetail extends LitElement {
         mwc-button.warning {
           margin-right: auto;
         }
-        ha-textfield {
-          display: block;
-          margin-bottom: 16px;
+        .error {
+          color: var(--error-color);
         }
         ha-switch {
           margin-right: 16px;

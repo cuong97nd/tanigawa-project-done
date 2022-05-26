@@ -25,17 +25,12 @@ import {
   ChooseAction,
   ChooseActionChoice,
   getActionType,
-  IfAction,
-  ParallelAction,
-  RepeatAction,
 } from "../../data/script";
 import { describeAction } from "../../data/script_i18n";
 import {
-  ActionTraceStep,
   AutomationTraceExtended,
   ChooseActionTraceStep,
   getDataFromPath,
-  IfActionTraceStep,
   isTriggerPath,
   TriggerTraceStep,
 } from "../../data/trace";
@@ -110,13 +105,13 @@ class LogbookRenderer {
   }
 
   get hasNext() {
-    return this.curIndex < this.logbookEntries.length;
+    return this.curIndex !== this.logbookEntries.length;
   }
 
   maybeRenderItem() {
     const logbookEntry = this.curItem;
     this.curIndex++;
-    const entryDate = new Date(logbookEntry.when * 1000);
+    const entryDate = new Date(logbookEntry.when);
 
     if (this.pendingItems.length === 0) {
       this.pendingItems.push([entryDate, logbookEntry]);
@@ -206,7 +201,7 @@ class ActionRenderer {
   }
 
   get hasNext() {
-    return this.curIndex < this.keys.length;
+    return this.curIndex !== this.keys.length;
   }
 
   renderItem() {
@@ -219,36 +214,20 @@ class ActionRenderer {
 
   private _renderItem(
     index: number,
-    actionType?: ReturnType<typeof getActionType>,
-    renderAllIterations?: boolean
+    actionType?: ReturnType<typeof getActionType>
   ): number {
     const value = this._getItem(index);
 
-    if (renderAllIterations) {
-      let i;
-      value.forEach((item) => {
-        i = this._renderIteration(index, item, actionType);
-      });
-      return i;
-    }
-    return this._renderIteration(index, value[0], actionType);
-  }
-
-  private _renderIteration(
-    index: number,
-    value: ActionTraceStep,
-    actionType?: ReturnType<typeof getActionType>
-  ) {
-    if (isTriggerPath(value.path)) {
-      return this._handleTrigger(index, value as TriggerTraceStep);
+    if (isTriggerPath(value[0].path)) {
+      return this._handleTrigger(index, value[0] as TriggerTraceStep);
     }
 
-    const timestamp = new Date(value.timestamp);
+    const timestamp = new Date(value[0].timestamp);
 
     // Render all logbook items that are in front of this item.
     while (
       this.logbookRenderer.hasNext &&
-      new Date(this.logbookRenderer.curItem.when * 1000) < timestamp
+      new Date(this.logbookRenderer.curItem.when) < timestamp
     ) {
       this.logbookRenderer.maybeRenderItem();
     }
@@ -256,7 +235,7 @@ class ActionRenderer {
     this.logbookRenderer.flush();
     this.timeTracker.maybeRenderTime(timestamp);
 
-    const path = value.path;
+    const path = value[0].path;
     let data;
     try {
       data = getDataFromPath(this.trace.config, path);
@@ -284,24 +263,7 @@ class ActionRenderer {
       return this._handleChoose(index);
     }
 
-    if (actionType === "repeat") {
-      return this._handleRepeat(index);
-    }
-
-    if (actionType === "if") {
-      return this._handleIf(index);
-    }
-
-    if (actionType === "parallel") {
-      return this._handleParallel(index);
-    }
-
-    this._renderEntry(
-      path,
-      describeAction(this.hass, data, actionType),
-      undefined,
-      data.enabled === false
-    );
+    this._renderEntry(path, describeAction(this.hass, data, actionType));
 
     let i = index + 1;
 
@@ -354,16 +316,10 @@ class ActionRenderer {
     const chooseConfig = this._getDataFromPath(
       this.keys[index]
     ) as ChooseAction;
-    const disabled = chooseConfig.enabled === false;
     const name = chooseConfig.alias || "Choose";
 
     if (defaultExecuted) {
-      this._renderEntry(
-        choosePath,
-        `${name}: Default action executed`,
-        undefined,
-        disabled
-      );
+      this._renderEntry(choosePath, `${name}: Default action executed`);
     } else if (chooseTrace.result) {
       const choiceNumeric =
         chooseTrace.result.choice !== "default"
@@ -375,19 +331,9 @@ class ActionRenderer {
       const choiceName = choiceConfig
         ? `${choiceConfig.alias || `Option ${choiceNumeric}`} executed`
         : `Error: ${chooseTrace.error}`;
-      this._renderEntry(
-        choosePath,
-        `${name}: ${choiceName}`,
-        undefined,
-        disabled
-      );
+      this._renderEntry(choosePath, `${name}: ${choiceName}`);
     } else {
-      this._renderEntry(
-        choosePath,
-        `${name}: No action taken`,
-        undefined,
-        disabled
-      );
+      this._renderEntry(choosePath, `${name}: No action taken`);
     }
 
     let i;
@@ -428,130 +374,14 @@ class ActionRenderer {
     return i;
   }
 
-  private _handleRepeat(index: number): number {
-    const repeatPath = this.keys[index];
-    const startLevel = repeatPath.split("/").length;
-
-    const repeatConfig = this._getDataFromPath(
-      this.keys[index]
-    ) as RepeatAction;
-    const disabled = repeatConfig.enabled === false;
-
-    const name = repeatConfig.alias || describeAction(this.hass, repeatConfig);
-
-    this._renderEntry(repeatPath, name, undefined, disabled);
-
-    let i;
-
-    for (i = index + 1; i < this.keys.length; i++) {
-      const path = this.keys[i];
-      const parts = path.split("/");
-
-      // We're done if no more sequence in current level
-      if (parts.length <= startLevel) {
-        return i;
-      }
-
-      i = this._renderItem(i, getActionType(this._getDataFromPath(path)), true);
-    }
-
-    return i;
-  }
-
-  private _handleIf(index: number): number {
-    const ifPath = this.keys[index];
-    const startLevel = ifPath.split("/").length;
-
-    const ifTrace = this._getItem(index)[0] as IfActionTraceStep;
-    const ifConfig = this._getDataFromPath(this.keys[index]) as IfAction;
-    const disabled = ifConfig.enabled === false;
-    const name = ifConfig.alias || "If";
-
-    if (ifTrace.result?.choice) {
-      const choiceConfig = this._getDataFromPath(
-        `${this.keys[index]}/${ifTrace.result.choice}/`
-      ) as any;
-      const choiceName = choiceConfig
-        ? `${choiceConfig.alias || `${ifTrace.result.choice} action executed`}`
-        : `Error: ${ifTrace.error}`;
-      this._renderEntry(ifPath, `${name}: ${choiceName}`, undefined, disabled);
-    } else {
-      this._renderEntry(
-        ifPath,
-        `${name}: No action taken`,
-        undefined,
-        disabled
-      );
-    }
-
-    let i;
-
-    // Skip over conditions
-    for (i = index + 1; i < this.keys.length; i++) {
-      const path = this.keys[i];
-      const parts = this.keys[i].split("/");
-
-      // We're done if no more sequence in current level
-      if (parts.length <= startLevel) {
-        return i;
-      }
-
-      // We're going to skip all conditions
-      if (
-        parts[startLevel + 1] === "condition" ||
-        parts.length < startLevel + 2
-      ) {
-        continue;
-      }
-
-      i = this._renderItem(i, getActionType(this._getDataFromPath(path)));
-    }
-
-    return i;
-  }
-
-  private _handleParallel(index: number): number {
-    const parallelPath = this.keys[index];
-    const startLevel = parallelPath.split("/").length;
-
-    const parallelConfig = this._getDataFromPath(
-      this.keys[index]
-    ) as ParallelAction;
-
-    const disabled = parallelConfig.enabled === false;
-
-    const name = parallelConfig.alias || "Execute in parallel";
-
-    this._renderEntry(parallelPath, name, undefined, disabled);
-
-    let i;
-
-    for (i = index + 1; i < this.keys.length; i++) {
-      const path = this.keys[i];
-      const parts = path.split("/");
-
-      // We're done if no more sequence in current level
-      if (parts.length <= startLevel) {
-        return i;
-      }
-
-      i = this._renderItem(i, getActionType(this._getDataFromPath(path)));
-    }
-
-    return i;
-  }
-
   private _renderEntry(
     path: string,
     description: string,
-    icon = mdiRecordCircleOutline,
-    disabled = false
+    icon = mdiRecordCircleOutline
   ) {
     this.entries.push(html`
-      <ha-timeline .icon=${icon} data-path=${path} .notEnabled=${disabled}>
-        ${description}${disabled
-          ? html`<span class="disabled"> (disabled)</span>`
-          : ""}
+      <ha-timeline .icon=${icon} data-path=${path}>
+        ${description}
       </ha-timeline>
     `);
   }

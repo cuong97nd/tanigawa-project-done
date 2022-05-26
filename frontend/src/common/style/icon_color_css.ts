@@ -7,7 +7,6 @@ export const iconColorCSS = css`
   ha-state-icon[data-domain="calendar"][data-state="on"],
   ha-state-icon[data-domain="camera"][data-state="streaming"],
   ha-state-icon[data-domain="cover"][data-state="open"],
-  ha-state-icon[data-domain="device_tracker"][data-state="home"],
   ha-state-icon[data-domain="fan"][data-state="on"],
   ha-state-icon[data-domain="humidifier"][data-state="on"],
   ha-state-icon[data-domain="light"][data-state="on"],
@@ -71,6 +70,9 @@ export const iconColorCSS = css`
   }
 
   ha-state-icon[data-domain="plant"][data-state="problem"],
+  ha-state-icon[data-domain="zwave"][data-state="dead"] {
+    color: var(--state-icon-error-color);
+  }
 
   /* Color the icon if unavailable */
   ha-state-icon[data-state="unavailable"] {

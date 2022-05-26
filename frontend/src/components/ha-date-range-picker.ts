@@ -3,6 +3,7 @@ import "@material/mwc-list/mwc-list";
 import { ActionDetail } from "@material/mwc-list/mwc-list-foundation";
 import "@material/mwc-list/mwc-list-item";
 import { mdiCalendar } from "@mdi/js";
+import "@polymer/paper-input/paper-input";
 import {
   css,
   CSSResultGroup,
@@ -18,7 +19,6 @@ import { computeRTLDirection } from "../common/util/compute_rtl";
 import { HomeAssistant } from "../types";
 import "./date-range-picker";
 import "./ha-svg-icon";
-import "./ha-textfield";
 
 export interface DateRangePickerRanges {
   [key: string]: [Date, Date];
@@ -61,7 +61,7 @@ export class HaDateRangePicker extends LitElement {
       >
         <div slot="input" class="date-range-inputs">
           <ha-svg-icon .path=${mdiCalendar}></ha-svg-icon>
-          <ha-textfield
+          <paper-input
             .value=${formatDateTime(this.startDate, this.hass.locale)}
             .label=${this.hass.localize(
               "ui.components.date-range-picker.start_date"
@@ -69,16 +69,16 @@ export class HaDateRangePicker extends LitElement {
             .disabled=${this.disabled}
             @click=${this._handleInputClick}
             readonly
-          ></ha-textfield>
-          <ha-textfield
+          ></paper-input>
+          <paper-input
             .value=${formatDateTime(this.endDate, this.hass.locale)}
-            .label=${this.hass.localize(
+            label=${this.hass.localize(
               "ui.components.date-range-picker.end_date"
             )}
             .disabled=${this.disabled}
             @click=${this._handleInputClick}
             readonly
-          ></ha-textfield>
+          ></paper-input>
         </div>
         ${this.ranges
           ? html`<div
@@ -140,9 +140,6 @@ export class HaDateRangePicker extends LitElement {
     return css`
       ha-svg-icon {
         margin-right: 8px;
-        margin-inline-end: 8px;
-        margin-inline-start: initial;
-        direction: var(--direction);
       }
 
       .date-range-inputs {
@@ -161,17 +158,14 @@ export class HaDateRangePicker extends LitElement {
         border-top: 1px solid var(--divider-color);
       }
 
-      ha-textfield {
+      paper-input {
         display: inline-block;
         max-width: 250px;
         min-width: 200px;
       }
 
-      ha-textfield:last-child {
+      paper-input:last-child {
         margin-left: 8px;
-        margin-inline-start: 8px;
-        margin-inline-end: initial;
-        direction: var(--direction);
       }
 
       @media only screen and (max-width: 800px) {
@@ -182,7 +176,7 @@ export class HaDateRangePicker extends LitElement {
       }
 
       @media only screen and (max-width: 500px) {
-        ha-textfield {
+        paper-input {
           min-width: inherit;
         }
 

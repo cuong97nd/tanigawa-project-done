@@ -29,29 +29,6 @@
                 "source": "user",
                 "unique_id": null,
                 "disabled_by": null
-            },
-            {
-                "entry_id": "9fbf0e451fa66601e3ec7723d41d9743",
-                "version": 1,
-                "domain": "onvif",
-                "title": "sdg - B4:B0:24:CD:CB:2D",
-                "data": {
-                    "name": "sdg",
-                    "host": "http://10.0.1.113:2020/onvif/device_service",
-                    "port": 2020,
-                    "username": "tanigawa",
-                    "password": "tanigawa",
-                    "snapshot_auth": "digest"
-                },
-                "options": {
-                    "extra_arguments": "-pred 1",
-                    "rtsp_transport": "tcp"
-                },
-                "pref_disable_new_entities": false,
-                "pref_disable_polling": false,
-                "source": "user",
-                "unique_id": "B4:B0:24:CD:CB:2D",
-                "disabled_by": null
             }
         ]
     }

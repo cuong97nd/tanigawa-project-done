@@ -48,7 +48,7 @@ class HassioCoreInfo extends LitElement {
     ];
 
     return html`
-      <ha-card header="Core" outlined>
+      <ha-card header="Core">
         <div class="card-content">
           <div>
             <ha-settings-row>

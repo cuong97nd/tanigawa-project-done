@@ -1,7 +1,7 @@
 import "../ha-header-bar";
 import { mdiArrowLeft, mdiClose } from "@mdi/js";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
-import { customElement, property, query, state } from "lit/decorators";
+import { customElement, property, state } from "lit/decorators";
 import { fireEvent, HASSDomEvent } from "../../common/dom/fire_event";
 import { computeRTLDirection } from "../../common/util/compute_rtl";
 import type {
@@ -13,11 +13,7 @@ import { haStyleDialog } from "../../resources/styles";
 import type { HomeAssistant } from "../../types";
 import "../ha-dialog";
 import "./ha-media-player-browse";
-import "./ha-media-manage-button";
-import type {
-  HaMediaPlayerBrowse,
-  MediaPlayerItemId,
-} from "./ha-media-player-browse";
+import type { MediaPlayerItemId } from "./ha-media-player-browse";
 import { MediaPlayerBrowseDialogParams } from "./show-media-browser-dialog";
 
 @customElement("dialog-media-player-browse")
@@ -29,8 +25,6 @@ class DialogMediaPlayerBrowse extends LitElement {
   @state() private _navigateIds?: MediaPlayerItemId[];
 
   @state() private _params?: MediaPlayerBrowseDialogParams;
-
-  @query("ha-media-player-browse") private _browser!: HaMediaPlayerBrowse;
 
   public showDialog(params: MediaPlayerBrowseDialogParams): void {
     this._params = params;
@@ -86,12 +80,6 @@ class DialogMediaPlayerBrowse extends LitElement {
               : this._currentItem.title}
           </span>
 
-          <ha-media-manage-button
-            slot="actionItems"
-            .hass=${this.hass}
-            .currentItem=${this._currentItem}
-            @media-refresh=${this._refreshMedia}
-          ></ha-media-manage-button>
           <ha-icon-button
             .label=${this.hass.localize("ui.dialogs.generic.close")}
             .path=${mdiClose}
@@ -136,10 +124,6 @@ class DialogMediaPlayerBrowse extends LitElement {
     return this._params!.action || "play";
   }
 
-  private _refreshMedia() {
-    this._browser.refresh();
-  }
-
   static get styles(): CSSResultGroup {
     return [
       haStyleDialog,
@@ -151,8 +135,6 @@ class DialogMediaPlayerBrowse extends LitElement {
 
         ha-media-player-browse {
           --media-browser-max-height: calc(100vh - 65px);
-          height: calc(100vh - 65px);
-          direction: ltr;
         }
 
         @media (min-width: 800px) {
@@ -165,7 +147,6 @@ class DialogMediaPlayerBrowse extends LitElement {
           ha-media-player-browse {
             position: initial;
             --media-browser-max-height: 100vh - 137px;
-            height: 100vh - 137px;
             width: 700px;
           }
         }
@@ -175,10 +156,6 @@ class DialogMediaPlayerBrowse extends LitElement {
           --mdc-theme-primary: var(--mdc-theme-surface);
           flex-shrink: 0;
           border-bottom: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
-        }
-
-        ha-media-manage-button {
-          --mdc-theme-primary: var(--mdc-theme-on-primary);
         }
       `,
     ];

@@ -19,7 +19,6 @@ import memoizeOne from "memoize-one";
 import { fireEvent } from "../../common/dom/fire_event";
 import type { LeafletModuleType } from "../../common/dom/setup-leaflet-map";
 import type { HomeAssistant } from "../../types";
-import "../ha-input-helper-text";
 import "./ha-map";
 import type { HaMap } from "./ha-map";
 
@@ -50,8 +49,6 @@ export class HaLocationsEditor extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property({ attribute: false }) public locations?: MarkerLocation[];
-
-  @property() public helper?: string;
 
   @property({ type: Boolean }) public autoFit = false;
 
@@ -105,18 +102,13 @@ export class HaLocationsEditor extends LitElement {
   }
 
   protected render(): TemplateResult {
-    return html`
-      <ha-map
-        .hass=${this.hass}
-        .layers=${this._getLayers(this._circles, this._locationMarkers)}
-        .zoom=${this.zoom}
-        .autoFit=${this.autoFit}
-        .darkMode=${this.darkMode}
-      ></ha-map>
-      ${this.helper
-        ? html`<ha-input-helper-text>${this.helper}</ha-input-helper-text>`
-        : ""}
-    `;
+    return html`<ha-map
+      .hass=${this.hass}
+      .layers=${this._getLayers(this._circles, this._locationMarkers)}
+      .zoom=${this.zoom}
+      .autoFit=${this.autoFit}
+      .darkMode=${this.darkMode}
+    ></ha-map>`;
   }
 
   private _getLayers = memoizeOne(
@@ -295,8 +287,11 @@ export class HaLocationsEditor extends LitElement {
 
   static get styles(): CSSResultGroup {
     return css`
-      ha-map {
+      :host {
         display: block;
+        height: 300px;
+      }
+      ha-map {
         height: 100%;
       }
     `;

@@ -85,7 +85,7 @@ export class HassioUpdate extends LitElement {
       return html``;
     }
     return html`
-      <ha-card outlined>
+      <ha-card>
         <div class="card-content">
           <div class="icon">
             <ha-svg-icon .path=${mdiHomeAssistant}></ha-svg-icon>

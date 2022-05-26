@@ -1,17 +1,16 @@
-import "../../../src/components/ha-ansi-to-html";
 import "@material/mwc-button";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import "../../../src/components/buttons/ha-progress-button";
 import "../../../src/components/ha-alert";
 import "../../../src/components/ha-card";
-import "../../../src/components/ha-select";
 import { extractApiErrorMessage } from "../../../src/data/hassio/common";
 import { fetchHassioLogs } from "../../../src/data/hassio/supervisor";
 import { Supervisor } from "../../../src/data/supervisor/supervisor";
 import "../../../src/layouts/hass-loading-screen";
 import { haStyle } from "../../../src/resources/styles";
 import { HomeAssistant } from "../../../src/types";
+import "../components/hassio-ansi-to-html";
 import { hassioStyle } from "../resources/hassio-style";
 
 interface LogProvider {
@@ -65,13 +64,13 @@ class HassioSupervisorLog extends LitElement {
 
   protected render(): TemplateResult | void {
     return html`
-      <ha-card outlined>
+      <ha-card>
         ${this._error
           ? html`<ha-alert alert-type="error">${this._error}</ha-alert>`
           : ""}
         ${this.hass.userData?.showAdvanced
           ? html`
-              <ha-select
+              <mwc-select
                 .label=${this.supervisor.localize("system.log.log_provider")}
                 @selected=${this._setLogProvider}
                 .value=${this._selectedLogProvider}
@@ -83,14 +82,14 @@ class HassioSupervisorLog extends LitElement {
                     </mwc-list-item>
                   `
                 )}
-              </ha-select>
+              </mwc-select>
             `
           : ""}
 
         <div class="card-content" id="content">
           ${this._content
-            ? html`<ha-ansi-to-html .content=${this._content}>
-              </ha-ansi-to-html>`
+            ? html`<hassio-ansi-to-html .content=${this._content}>
+              </hassio-ansi-to-html>`
             : html`<hass-loading-screen no-toolbar></hass-loading-screen>`}
         </div>
         <div class="card-actions">
@@ -146,7 +145,7 @@ class HassioSupervisorLog extends LitElement {
         pre {
           white-space: pre-wrap;
         }
-        ha-select {
+        mwc-select {
           width: 100%;
           margin-bottom: 4px;
         }

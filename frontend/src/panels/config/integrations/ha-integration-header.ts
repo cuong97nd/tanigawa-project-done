@@ -135,19 +135,13 @@ export class HaIntegrationHeader extends LitElement {
     .header {
       display: flex;
       position: relative;
-      padding-top: 0px;
-      padding-bottom: 8px;
-      padding-inline-start: 16px;
-      padding-inline-end: 8px;
-      direction: var(--direction);
+      padding: 0 8px 8px 16px;
     }
     .header img {
+      margin-right: 16px;
       margin-top: 16px;
-      margin-inline-start: initial;
-      margin-inline-end: 16px;
       width: 40px;
       height: 40px;
-      direction: var(--direction);
     }
     .header .info {
       flex: 1;

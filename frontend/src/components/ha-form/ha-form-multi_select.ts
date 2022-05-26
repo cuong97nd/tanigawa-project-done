@@ -1,3 +1,4 @@
+import "@material/mwc-select/mwc-select";
 import { mdiMenuDown, mdiMenuUp } from "@mdi/js";
 import {
   css,

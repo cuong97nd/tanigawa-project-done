@@ -120,7 +120,6 @@ export const computeOpenIcon = (stateObj: HassEntity): string => {
     case "awning":
     case "door":
     case "gate":
-    case "curtain":
       return mdiArrowExpandHorizontal;
     default:
       return mdiArrowUp;
@@ -132,7 +131,6 @@ export const computeCloseIcon = (stateObj: HassEntity): string => {
     case "awning":
     case "door":
     case "gate":
-    case "curtain":
       return mdiArrowCollapseHorizontal;
     default:
       return mdiArrowDown;

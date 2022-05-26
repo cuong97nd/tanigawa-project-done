@@ -130,13 +130,7 @@ export class HaTabsSubpageDataTable extends LitElement {
    * Array of tabs to show on the page.
    * @type {Array}
    */
-  @property() public tabs: PageNavigation[] = [];
-
-  /**
-   * Force hides the filter menu.
-   * @type {Boolean}
-   */
-  @property({ type: Boolean }) public hideFilterMenu = false;
+  @property() public tabs!: PageNavigation[];
 
   @query("ha-data-table", true) private _dataTable!: HaDataTable;
 
@@ -201,24 +195,16 @@ export class HaTabsSubpageDataTable extends LitElement {
         .mainPage=${this.mainPage}
         .supervisor=${this.supervisor}
       >
-        ${!this.hideFilterMenu
-          ? html`
-              <div slot="toolbar-icon">
-                ${this.narrow
-                  ? html`
-                      <div class="filter-menu">
-                        ${this.numHidden || this.activeFilters
-                          ? html`<span class="badge"
-                              >${this.numHidden || "!"}</span
-                            >`
-                          : ""}
-                        <slot name="filter-menu"></slot>
-                      </div>
-                    `
-                  : ""}<slot name="toolbar-icon"></slot>
-              </div>
-            `
-          : ""}
+        <div slot="toolbar-icon">
+          ${this.narrow
+            ? html`<div class="filter-menu">
+                ${this.numHidden || this.activeFilters
+                  ? html`<span class="badge">${this.numHidden || "!"}</span>`
+                  : ""}
+                <slot name="filter-menu"></slot>
+              </div>`
+            : ""}<slot name="toolbar-icon"></slot>
+        </div>
         ${this.narrow
           ? html`
               <div slot="header">
@@ -282,9 +268,6 @@ export class HaTabsSubpageDataTable extends LitElement {
       :host(:not([narrow])) ha-data-table {
         height: calc(100vh - 1px - var(--header-height));
         display: block;
-      }
-      :host([narrow]) hass-tabs-subpage {
-        --main-title-margin: 0;
       }
       .table-header {
         display: flex;

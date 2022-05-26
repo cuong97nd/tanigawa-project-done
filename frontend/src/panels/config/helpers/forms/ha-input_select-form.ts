@@ -79,15 +79,13 @@ class HaInputSelectForm extends LitElement {
             "ui.dialogs.helper_settings.generic.icon"
           )}
         ></ha-icon-picker>
-        <div class="header">
-          ${this.hass!.localize(
-            "ui.dialogs.helper_settings.input_select.options"
-          )}:
-        </div>
+        ${this.hass!.localize(
+          "ui.dialogs.helper_settings.input_select.options"
+        )}:
         ${this._options.length
           ? this._options.map(
               (option, index) => html`
-                <mwc-list-item class="option" hasMeta>
+                <mwc-list-item class="option" hasMeta noninteractive>
                   ${option}
                   <ha-icon-button
                     slot="meta"
@@ -207,10 +205,6 @@ class HaInputSelectForm extends LitElement {
         }
         #option_input {
           margin-top: 8px;
-        }
-        .header {
-          margin-top: 8px;
-          margin-bottom: 8px;
         }
       `,
     ];

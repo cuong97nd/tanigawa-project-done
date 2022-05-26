@@ -30,7 +30,7 @@ import { HomeAssistant } from "../types";
 import "./action-badge";
 import "./integration-badge";
 
-const HIDDEN_DOMAINS = new Set(["hassio", "met", "radio_browser", "rpi_power"]);
+const HIDDEN_DOMAINS = new Set(["met", "rpi_power", "hassio"]);
 
 @customElement("onboarding-integrations")
 class OnboardingIntegrations extends LitElement {
@@ -49,14 +49,12 @@ class OnboardingIntegrations extends LitElement {
     this.hass.loadBackendTranslation("title", undefined, true);
     this._unsubEvents = subscribeConfigFlowInProgress(this.hass, (flows) => {
       this._discovered = flows;
-      const integrations: Set<string> = new Set();
       for (const flow of flows) {
         // To render title placeholders
         if (flow.context.title_placeholders) {
-          integrations.add(flow.handler);
+          this.hass.loadBackendTranslation("config", flow.handler);
         }
       }
-      this.hass.loadBackendTranslation("config", Array.from(integrations));
     });
   }
 
@@ -171,8 +169,8 @@ class OnboardingIntegrations extends LitElement {
   }
 
   private async _loadConfigEntries() {
-    const entries = await getConfigEntries(this.hass!, { type: "integration" });
-    // We filter out the config entries that are automatically created during onboarding.
+    const entries = await getConfigEntries(this.hass!);
+    // We filter out the config entry for the local weather and rpi_power.
     // It is one that we create automatically and it will confuse the user
     // if it starts showing up during onboarding.
     this._entries = entries.filter(

@@ -29,11 +29,8 @@ import {
   mdiPowerPlug,
   mdiPowerPlugOff,
   mdiRadioboxBlank,
+  mdiSmoke,
   mdiSnowflake,
-  mdiSmokeDetector,
-  mdiSmokeDetectorAlert,
-  mdiSmokeDetectorVariant,
-  mdiSmokeDetectorVariantAlert,
   mdiSquare,
   mdiSquareOutline,
   mdiStop,
@@ -55,8 +52,6 @@ export const binarySensorIcon = (state?: string, stateObj?: HassEntity) => {
       return is_off ? mdiBattery : mdiBatteryOutline;
     case "battery_charging":
       return is_off ? mdiBattery : mdiBatteryCharging;
-    case "carbon_monoxide":
-      return is_off ? mdiSmokeDetector : mdiSmokeDetectorAlert;
     case "cold":
       return is_off ? mdiThermometer : mdiSnowflake;
     case "connectivity":
@@ -73,7 +68,7 @@ export const binarySensorIcon = (state?: string, stateObj?: HassEntity) => {
     case "tamper":
       return is_off ? mdiCheckCircle : mdiAlertCircle;
     case "smoke":
-      return is_off ? mdiSmokeDetectorVariant : mdiSmokeDetectorVariantAlert;
+      return is_off ? mdiCheckCircle : mdiSmoke;
     case "heat":
       return is_off ? mdiThermometer : mdiFire;
     case "light":

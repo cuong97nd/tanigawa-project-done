@@ -60,11 +60,6 @@ export class EnergyStrategy {
       });
     }
 
-    view.cards!.push({
-      type: "energy-compare",
-      collection_key: "energy_dashboard",
-    });
-
     // Only include if we have a grid source.
     if (hasGrid) {
       view.cards!.push({

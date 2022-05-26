@@ -9,6 +9,7 @@ import {
 } from "@mdi/js";
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
+import "@polymer/paper-input/paper-textarea";
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import {
   css,
@@ -200,7 +201,7 @@ export class HaAutomationEditor extends KeyboardShortcutMixin(LitElement) {
         ${this._config
           ? html`
               ${this.narrow
-                ? html`<span slot="header">${this._config?.alias}</span>`
+                ? html` <span slot="header">${this._config?.alias}</span> `
                 : ""}
               <div
                 class="content ${classMap({
@@ -209,38 +210,34 @@ export class HaAutomationEditor extends KeyboardShortcutMixin(LitElement) {
                 @subscribe-automation-config=${this._subscribeAutomationConfig}
               >
                 ${this._errors
-                  ? html`<div class="errors">${this._errors}</div>`
+                  ? html` <div class="errors">${this._errors}</div> `
                   : ""}
                 ${this._mode === "gui"
                   ? html`
                       ${"use_blueprint" in this._config
-                        ? html`
-                            <blueprint-automation-editor
-                              .hass=${this.hass}
-                              .narrow=${this.narrow}
-                              .isWide=${this.isWide}
-                              .stateObj=${stateObj}
-                              .config=${this._config}
-                              @value-changed=${this._valueChanged}
-                            ></blueprint-automation-editor>
-                          `
-                        : html`
-                            <manual-automation-editor
-                              .hass=${this.hass}
-                              .narrow=${this.narrow}
-                              .isWide=${this.isWide}
-                              .stateObj=${stateObj}
-                              .config=${this._config}
-                              @value-changed=${this._valueChanged}
-                            ></manual-automation-editor>
-                          `}
+                        ? html`<blueprint-automation-editor
+                            .hass=${this.hass}
+                            .narrow=${this.narrow}
+                            .isWide=${this.isWide}
+                            .stateObj=${stateObj}
+                            .config=${this._config}
+                            @value-changed=${this._valueChanged}
+                          ></blueprint-automation-editor>`
+                        : html`<manual-automation-editor
+                            .hass=${this.hass}
+                            .narrow=${this.narrow}
+                            .isWide=${this.isWide}
+                            .stateObj=${stateObj}
+                            .config=${this._config}
+                            @value-changed=${this._valueChanged}
+                          ></manual-automation-editor>`}
                     `
                   : this._mode === "yaml"
                   ? html`
                       ${!this.narrow
                         ? html`
-                            <ha-card outlined>
-                              <div class="card-header">
+                            <ha-card
+                              ><div class="card-header">
                                 ${this._config.alias}
                               </div>
                               ${stateObj
@@ -275,8 +272,8 @@ export class HaAutomationEditor extends KeyboardShortcutMixin(LitElement) {
                         .defaultValue=${this._preprocessYaml()}
                         @value-changed=${this._yamlChanged}
                       ></ha-yaml-editor>
-                      <ha-card outlined>
-                        <div class="card-actions">
+                      <ha-card
+                        ><div class="card-actions">
                           <mwc-button @click=${this._copyYaml}>
                             ${this.hass.localize(
                               "ui.panel.config.automation.editor.copy_to_clipboard"

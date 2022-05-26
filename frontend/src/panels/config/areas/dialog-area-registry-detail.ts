@@ -1,10 +1,10 @@
 import "@material/mwc-button";
+import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { property, state } from "lit/decorators";
 import { fireEvent } from "../../../common/dom/fire_event";
 import { createCloseHeading } from "../../../components/ha-dialog";
 import "../../../components/ha-alert";
-import "../../../components/ha-textfield";
 import "../../../components/ha-picture-upload";
 import type { HaPictureUpload } from "../../../components/ha-picture-upload";
 import { AreaRegistryEntryMutableParams } from "../../../data/area_registry";
@@ -69,7 +69,7 @@ class DialogAreaDetail extends LitElement {
       >
         <div>
           ${this._error
-            ? html`<ha-alert alert-type="error">${this._error}</ha-alert>`
+            ? html` <ha-alert alert-type="error">${this._error}</ha-alert> `
             : ""}
           <div class="form">
             ${entry
@@ -83,16 +83,17 @@ class DialogAreaDetail extends LitElement {
                 `
               : ""}
 
-            <ha-textfield
+            <paper-input
               .value=${this._name}
-              @input=${this._nameChanged}
+              @value-changed=${this._nameChanged}
+              @keyup=${this._handleKeyup}
               .label=${this.hass.localize("ui.panel.config.areas.editor.name")}
               .errorMessage=${this.hass.localize(
                 "ui.panel.config.areas.editor.name_required"
               )}
               .invalid=${nameInvalid}
               dialogInitialFocus
-            ></ha-textfield>
+            ></paper-input>
             <ha-picture-upload
               .hass=${this.hass}
               .value=${this._picture}
@@ -131,9 +132,15 @@ class DialogAreaDetail extends LitElement {
     return this._name.trim() !== "";
   }
 
-  private _nameChanged(ev) {
+  private _handleKeyup(ev: KeyboardEvent) {
+    if (ev.keyCode === 13 && this._isNameValid() && !this._submitting) {
+      this._updateEntry();
+    }
+  }
+
+  private _nameChanged(ev: PolymerChangedEvent<string>) {
     this._error = undefined;
-    this._name = ev.target.value;
+    this._name = ev.detail.value;
   }
 
   private _pictureChanged(ev: PolymerChangedEvent<string | null>) {
@@ -180,10 +187,6 @@ class DialogAreaDetail extends LitElement {
       css`
         .form {
           padding-bottom: 24px;
-        }
-        ha-textfield {
-          display: block;
-          margin-bottom: 16px;
         }
       `,
     ];

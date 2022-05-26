@@ -104,8 +104,7 @@ class StepFlowPickFlow extends LitElement {
           margin: 16px 0;
         }
         h2 {
-          padding-inline-end: 66px;
-          direction: var(--direction);
+          padding-right: 66px;
         }
         @media all and (max-height: 900px) {
           div {

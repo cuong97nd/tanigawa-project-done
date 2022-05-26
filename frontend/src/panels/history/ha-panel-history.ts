@@ -9,7 +9,7 @@ import {
   startOfToday,
   startOfWeek,
   startOfYesterday,
-} from "date-fns/esm";
+} from "date-fns";
 import { css, html, LitElement, PropertyValues } from "lit";
 import { property, state } from "lit/decorators";
 import { navigate } from "../../common/navigate";
@@ -25,7 +25,7 @@ import "../../components/ha-date-range-picker";
 import type { DateRangePickerRanges } from "../../components/ha-date-range-picker";
 import "../../components/ha-icon-button";
 import "../../components/ha-menu-button";
-import { computeHistory, fetchDateWS } from "../../data/history";
+import { computeHistory, fetchDate } from "../../data/history";
 import "../../layouts/ha-app-layout";
 import { haStyle } from "../../resources/styles";
 import { HomeAssistant } from "../../types";
@@ -81,7 +81,7 @@ class HaPanelHistory extends LitElement {
         </app-header>
 
         <div class="flex content">
-          <div class="filters">
+          <div class="flex layout horizontal wrap">
             <ha-date-range-picker
               .hass=${this.hass}
               ?disabled=${this._isLoading}
@@ -177,7 +177,7 @@ class HaPanelHistory extends LitElement {
 
   private async _getHistory() {
     this._isLoading = true;
-    const dateHistory = await fetchDateWS(
+    const dateHistory = await fetchDate(
       this.hass,
       this._startDate,
       this._endDate,
@@ -247,29 +247,13 @@ class HaPanelHistory extends LitElement {
           position: relative;
         }
 
-        .filters {
-          display: flex;
-          align-items: flex-end;
-          padding: 8px 16px 0;
-        }
-
-        :host([narrow]) .filters {
-          flex-wrap: wrap;
-        }
-
         ha-date-range-picker {
           margin-right: 16px;
-          margin-inline-end: 16px;
-          margin-inline-start: initial;
           max-width: 100%;
-          direction: var(--direction);
         }
 
         :host([narrow]) ha-date-range-picker {
           margin-right: 0;
-          margin-inline-end: 0;
-          margin-inline-start: initial;
-          direction: var(--direction);
         }
 
         ha-circular-progress {

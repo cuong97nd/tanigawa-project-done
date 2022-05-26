@@ -69,7 +69,6 @@ export class HaDeviceCondition extends LitElement {
       ${this._capabilities?.extra_fields
         ? html`
             <ha-form
-              .hass=${this.hass}
               .data=${this._extraFieldsData(this.condition, this._capabilities)}
               .schema=${this._capabilities.extra_fields}
               .computeLabel=${this._extraFieldsComputeLabelCallback(

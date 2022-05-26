@@ -1,13 +1,6 @@
 import { mdiChevronDown } from "@mdi/js";
-import {
-  css,
-  CSSResultGroup,
-  html,
-  LitElement,
-  PropertyValues,
-  TemplateResult,
-} from "lit";
-import { customElement, property, query, state } from "lit/decorators";
+import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
+import { customElement, property, query } from "lit/decorators";
 import { classMap } from "lit/directives/class-map";
 import { fireEvent } from "../common/dom/fire_event";
 import { nextRender } from "../common/util/render-status";
@@ -23,21 +16,11 @@ class HaExpansionPanel extends LitElement {
 
   @property() secondary?: string;
 
-  @state() _showContent = this.expanded;
-
   @query(".container") private _container!: HTMLDivElement;
 
   protected render(): TemplateResult {
     return html`
-      <div
-        id="summary"
-        @click=${this._toggleContainer}
-        @keydown=${this._toggleContainer}
-        role="button"
-        tabindex="0"
-        aria-expanded=${this.expanded}
-        aria-controls="sect1"
-      >
+      <div class="summary" @click=${this._toggleContainer}>
         <slot class="header" name="header">
           ${this.header}
           <slot class="secondary" name="secondary">${this.secondary}</slot>
@@ -50,37 +33,21 @@ class HaExpansionPanel extends LitElement {
       <div
         class="container ${classMap({ expanded: this.expanded })}"
         @transitionend=${this._handleTransitionEnd}
-        role="region"
-        aria-labelledby="summary"
-        aria-hidden=${!this.expanded}
-        tabindex="-1"
       >
-        ${this._showContent ? html`<slot></slot>` : ""}
+        <slot></slot>
       </div>
     `;
   }
 
-  protected willUpdate(changedProps: PropertyValues) {
-    if (changedProps.has("expanded") && this.expanded) {
-      this._showContent = this.expanded;
-    }
-  }
-
   private _handleTransitionEnd() {
     this._container.style.removeProperty("height");
-    this._showContent = this.expanded;
   }
 
-  private async _toggleContainer(ev): Promise<void> {
-    if (ev.type === "keydown" && ev.key !== "Enter" && ev.key !== " ") {
-      return;
-    }
-    ev.preventDefault();
+  private async _toggleContainer(): Promise<void> {
     const newExpanded = !this.expanded;
     fireEvent(this, "expanded-will-change", { expanded: newExpanded });
 
     if (newExpanded) {
-      this._showContent = true;
       // allow for dynamic content to be rendered
       await nextRender();
     }
@@ -113,29 +80,22 @@ class HaExpansionPanel extends LitElement {
           var(--divider-color, #e0e0e0)
         );
         border-radius: var(--ha-card-border-radius, 4px);
+        padding: 0 8px;
       }
 
-      #summary {
+      .summary {
         display: flex;
-        padding: var(--expansion-panel-summary-padding, 0 8px);
+        padding: var(--expansion-panel-summary-padding, 0);
         min-height: 48px;
         align-items: center;
         cursor: pointer;
         overflow: hidden;
         font-weight: 500;
-        outline: none;
-      }
-
-      #summary:focus {
-        background: var(--input-fill-color);
       }
 
       .summary-icon {
         transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
         margin-left: auto;
-        margin-inline-start: auto;
-        margin-inline-end: initial;
-        direction: var(--direction);
       }
 
       .summary-icon.expanded {
@@ -143,7 +103,6 @@ class HaExpansionPanel extends LitElement {
       }
 
       .container {
-        padding: var(--expansion-panel-content-padding, 0 8px);
         overflow: hidden;
         transition: height 300ms cubic-bezier(0.4, 0, 0.2, 1);
         height: 0px;

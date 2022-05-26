@@ -42,18 +42,8 @@ export const domainToName = (
   manifest?: IntegrationManifest
 ) => localize(`component.${domain}.title`) || manifest?.name || domain;
 
-export const fetchIntegrationManifests = (
-  hass: HomeAssistant,
-  integrations?: string[]
-) => {
-  const params: any = {
-    type: "manifest/list",
-  };
-  if (integrations) {
-    params.integrations = integrations;
-  }
-  return hass.callWS<IntegrationManifest[]>(params);
-};
+export const fetchIntegrationManifests = (hass: HomeAssistant) =>
+  hass.callWS<IntegrationManifest[]>({ type: "manifest/list" });
 
 export const fetchIntegrationManifest = (
   hass: HomeAssistant,

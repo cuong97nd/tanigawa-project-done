@@ -8,9 +8,9 @@ import {
   mdiCalendar,
   mdiCast,
   mdiCastConnected,
-  mdiCheckCircleOutline,
   mdiClock,
-  mdiCloseCircleOutline,
+  mdiEmoticonDead,
+  mdiFlash,
   mdiGestureTapButton,
   mdiLanConnect,
   mdiLanDisconnect,
@@ -18,18 +18,20 @@ import {
   mdiLockAlert,
   mdiLockClock,
   mdiLockOpen,
-  mdiPackage,
-  mdiPackageDown,
   mdiPackageUp,
   mdiPowerPlug,
   mdiPowerPlugOff,
   mdiRestart,
-  mdiToggleSwitchVariant,
-  mdiToggleSwitchVariantOff,
+  mdiSleep,
+  mdiTimerSand,
+  mdiToggleSwitch,
+  mdiToggleSwitchOff,
+  mdiCheckCircleOutline,
+  mdiCloseCircleOutline,
   mdiWeatherNight,
+  mdiZWave,
 } from "@mdi/js";
 import { HassEntity } from "home-assistant-js-websocket";
-import { updateIsInstalling, UpdateEntity } from "../../data/update";
 /**
  * Return the icon to be used for a domain.
  *
@@ -46,20 +48,6 @@ export const domainIcon = (
   stateObj?: HassEntity,
   state?: string
 ): string => {
-  const icon = domainIconWithoutDefault(domain, stateObj, state);
-  if (icon) {
-    return icon;
-  }
-  // eslint-disable-next-line
-  console.warn(`Unable to find icon for domain ${domain}`);
-  return DEFAULT_DOMAIN_ICON;
-};
-
-export const domainIconWithoutDefault = (
-  domain: string,
-  stateObj?: HassEntity,
-  state?: string
-): string | undefined => {
   const compareState = state !== undefined ? state : stateObj?.state;
 
   switch (domain) {
@@ -122,11 +110,21 @@ export const domainIconWithoutDefault = (
         case "outlet":
           return compareState === "on" ? mdiPowerPlug : mdiPowerPlugOff;
         case "switch":
-          return compareState === "on"
-            ? mdiToggleSwitchVariant
-            : mdiToggleSwitchVariantOff;
+          return compareState === "on" ? mdiToggleSwitch : mdiToggleSwitchOff;
         default:
-          return mdiToggleSwitchVariant;
+          return mdiFlash;
+      }
+
+    case "zwave":
+      switch (compareState) {
+        case "dead":
+          return mdiEmoticonDead;
+        case "sleeping":
+          return mdiSleep;
+        case "initializing":
+          return mdiTimerSand;
+        default:
+          return mdiZWave;
       }
 
     case "sensor": {
@@ -151,18 +149,13 @@ export const domainIconWithoutDefault = (
       return stateObj?.state === "above_horizon"
         ? FIXED_DOMAIN_ICONS[domain]
         : mdiWeatherNight;
-
-    case "update":
-      return compareState === "on"
-        ? updateIsInstalling(stateObj as UpdateEntity)
-          ? mdiPackageDown
-          : mdiPackageUp
-        : mdiPackage;
   }
 
   if (domain in FIXED_DOMAIN_ICONS) {
     return FIXED_DOMAIN_ICONS[domain];
   }
 
-  return undefined;
+  // eslint-disable-next-line
+  console.warn(`Unable to find icon for domain ${domain}`);
+  return DEFAULT_DOMAIN_ICON;
 };

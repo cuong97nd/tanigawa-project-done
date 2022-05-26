@@ -7,7 +7,6 @@ import type { HomeAssistant } from "../../../../../types";
 import type { ConditionElement } from "../ha-automation-condition-row";
 import type { LocalizeFunc } from "../../../../../common/translations/localize";
 import type { HaFormSchema } from "../../../../../components/ha-form/types";
-import "../../../../../components/ha-form/ha-form";
 
 const DAYS = {
   mon: 1,
@@ -117,8 +116,8 @@ export class HaTimeCondition extends LitElement implements ConditionElement {
     );
 
     const data = {
-      mode_before: inputModeBefore ? "input" : "value",
-      mode_after: inputModeAfter ? "input" : "value",
+      mode_before: "value",
+      mode_after: "value",
       ...this.condition,
     };
 
@@ -137,11 +136,18 @@ export class HaTimeCondition extends LitElement implements ConditionElement {
     ev.stopPropagation();
     const newValue = ev.detail.value;
 
-    this._inputModeAfter = newValue.mode_after === "input";
-    this._inputModeBefore = newValue.mode_before === "input";
+    const newModeAfter = newValue.mode_after === "input";
+    const newModeBefore = newValue.mode_before === "input";
 
-    delete newValue.mode_after;
-    delete newValue.mode_before;
+    if (newModeAfter !== this._inputModeAfter) {
+      this._inputModeAfter = newModeAfter;
+      newValue.after = undefined;
+    }
+
+    if (newModeBefore !== this._inputModeBefore) {
+      this._inputModeBefore = newModeBefore;
+      newValue.before = undefined;
+    }
 
     Object.keys(newValue).forEach((key) =>
       newValue[key] === undefined || newValue[key] === ""

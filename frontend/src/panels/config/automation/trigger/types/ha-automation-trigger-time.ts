@@ -23,9 +23,9 @@ export class HaTimeTrigger extends LitElement implements TriggerElement {
 
   private _schema = memoizeOne(
     (localize: LocalizeFunc, inputMode?: boolean): HaFormSchema[] => {
-      const atSelector = inputMode
-        ? { entity: { domain: "input_datetime" } }
-        : { time: {} };
+      const modeSchema = inputMode
+        ? { name: "at", selector: { entity: { domain: "input_datetime" } } }
+        : { name: "at", selector: { time: {} } };
 
       return [
         {
@@ -47,7 +47,7 @@ export class HaTimeTrigger extends LitElement implements TriggerElement {
             ],
           ],
         },
-        { name: "at", selector: atSelector },
+        modeSchema,
       ];
     }
   );
@@ -80,7 +80,7 @@ export class HaTimeTrigger extends LitElement implements TriggerElement {
     const schema: HaFormSchema[] = this._schema(this.hass.localize, inputMode);
 
     const data = {
-      mode: inputMode ? "input" : "value",
+      mode: "value",
       ...this.trigger,
     };
 
@@ -99,8 +99,7 @@ export class HaTimeTrigger extends LitElement implements TriggerElement {
     ev.stopPropagation();
     const newValue = ev.detail.value;
 
-    this._inputMode = newValue.mode === "input";
-    delete newValue.mode;
+    this._inputMode = newValue.mode.value === "input";
 
     Object.keys(newValue).forEach((key) =>
       newValue[key] === undefined || newValue[key] === ""

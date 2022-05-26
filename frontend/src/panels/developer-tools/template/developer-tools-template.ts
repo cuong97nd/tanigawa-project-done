@@ -248,6 +248,7 @@ class HaPanelDevTemplate extends LitElement {
 
         .content {
           padding: 16px;
+          direction: ltr;
         }
 
         .edit-pane {
@@ -279,7 +280,6 @@ class HaPanelDevTemplate extends LitElement {
           white-space: pre-wrap;
           background-color: var(--secondary-background-color);
           padding: 8px;
-          direction: ltr;
         }
 
         .all_listeners {
@@ -288,12 +288,6 @@ class HaPanelDevTemplate extends LitElement {
 
         .rendered.error {
           color: var(--error-color);
-        }
-
-        @media all and (max-width: 870px) {
-          .render-pane {
-            max-width: 100%;
-          }
         }
       `,
     ];
@@ -329,7 +323,6 @@ class HaPanelDevTemplate extends LitElement {
         {
           template: this._template,
           timeout: 3,
-          strict: true,
         }
       );
       await this._unsubRenderTemplate;

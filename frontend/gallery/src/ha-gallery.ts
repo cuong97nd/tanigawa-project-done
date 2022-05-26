@@ -5,7 +5,6 @@ import { html, css, LitElement, PropertyValues } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import "../../src/components/ha-icon-button";
 import "../../src/managers/notification-manager";
-import "../../src/components/ha-expansion-panel";
 import { haStyle } from "../../src/resources/styles";
 import { PAGES, SIDEBAR } from "../build/import-pages";
 import { dynamicElement } from "../../src/common/dom/dynamic-element-directive";
@@ -45,10 +44,6 @@ class HaGallery extends LitElement {
       for (const page of group.pages!) {
         const key = `${group.category}/${page}`;
         const active = this._page === key;
-        if (!(key in PAGES)) {
-          console.error("Undefined page referenced in sidebar.js:", key);
-          continue;
-        }
         const title = PAGES[key].metadata.title || page;
         links.push(html`
           <a ?active=${active} href=${`#${group.category}/${page}`}>${title}</a>
@@ -58,9 +53,10 @@ class HaGallery extends LitElement {
       sidebar.push(
         group.header
           ? html`
-              <ha-expansion-panel .header=${group.header}>
+              <details>
+                <summary class="section">${group.header}</summary>
                 ${links}
-              </ha-expansion-panel>
+              </details>
             `
           : links
       );
@@ -96,34 +92,27 @@ class HaGallery extends LitElement {
             ${dynamicElement(`demo-${this._page.replace("/", "-")}`)}
           </div>
           <div class="page-footer">
-            <div class="header">Help us to improve our documentation</div>
-            <div class="secondary">
-              Suggest an edit to this page, or provide/view feedback for this
-              page.
-            </div>
-            <div>
-              ${PAGES[this._page].description ||
-              Object.keys(PAGES[this._page].metadata).length > 0
-                ? html`
-                    <a
-                      href=${`${GITHUB_DEMO_URL}${this._page}.markdown`}
-                      target="_blank"
-                    >
-                      Edit text
-                    </a>
-                  `
-                : ""}
-              ${PAGES[this._page].demo
-                ? html`
-                    <a
-                      href=${`${GITHUB_DEMO_URL}${this._page}.ts`}
-                      target="_blank"
-                    >
-                      Edit demo
-                    </a>
-                  `
-                : ""}
-            </div>
+            ${PAGES[this._page].description ||
+            Object.keys(PAGES[this._page].metadata).length > 0
+              ? html`
+                  <a
+                    href=${`${GITHUB_DEMO_URL}${this._page}.markdown`}
+                    target="_blank"
+                  >
+                    Edit text
+                  </a>
+                `
+              : ""}
+            ${PAGES[this._page].demo
+              ? html`
+                  <a
+                    href=${`${GITHUB_DEMO_URL}${this._page}.ts`}
+                    target="_blank"
+                  >
+                    Edit demo
+                  </a>
+                `
+              : ""}
           </div>
         </div>
       </mwc-drawer>
@@ -197,16 +186,27 @@ class HaGallery extends LitElement {
         padding: 4px;
       }
 
+      .sidebar details {
+        margin-top: 1em;
+        margin-left: 1em;
+      }
+
+      .sidebar summary {
+        cursor: pointer;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
       .sidebar a {
         color: var(--primary-text-color);
         display: block;
-        padding: 12px;
+        padding: 4px 12px;
         text-decoration: none;
         position: relative;
       }
 
       .sidebar a[active]::before {
-        border-radius: 12px;
+        border-radius: 4px;
         position: absolute;
         top: 0;
         right: 2px;
@@ -237,32 +237,14 @@ class HaGallery extends LitElement {
 
       .page-footer {
         text-align: center;
-        margin: 16px;
-        padding: 16px;
-        border-radius: 12px;
-        background-color: var(--primary-background-color);
-      }
-
-      .page-footer div {
-        margin-top: 4px;
-      }
-
-      .page-footer .header {
-        font-size: 16px;
-        font-weight: 500;
-        line-height: 28px;
-        text-align: center;
-      }
-
-      .page-footer .secondary {
-        line-height: 23px;
-        text-align: center;
+        margin: 16px 0;
+        padding-top: 16px;
+        border-top: 1px solid rgba(0, 0, 0, 0.12);
       }
 
       .page-footer a {
         display: inline-block;
         margin: 0 8px;
-        text-decoration: none;
       }
     `,
   ];

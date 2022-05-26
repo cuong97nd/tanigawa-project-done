@@ -7,11 +7,8 @@ import { round } from "./round";
  * @param stateObj The entity state object
  */
 export const isNumericState = (stateObj: HassEntity): boolean =>
-  isNumericFromAttributes(stateObj.attributes);
-
-export const isNumericFromAttributes = (attributes: {
-  [key: string]: any;
-}): boolean => !!attributes.unit_of_measurement || !!attributes.state_class;
+  !!stateObj.attributes.unit_of_measurement ||
+  !!stateObj.attributes.state_class;
 
 export const numberFormatToLocale = (
   localeOptions: FrontendLocaleData

@@ -1,4 +1,5 @@
 import "@material/mwc-button";
+import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { fireEvent } from "../../common/dom/fire_event";
@@ -6,7 +7,6 @@ import { createCloseHeading } from "../../components/ha-dialog";
 import { haStyleDialog } from "../../resources/styles";
 import type { HomeAssistant } from "../../types";
 import { LongLivedAccessTokenDialogParams } from "./show-long-lived-access-token-dialog";
-import "../../components/ha-textfield";
 
 const QR_LOGO_URL = "/static/icons/favicon-192x192.png";
 
@@ -41,15 +41,14 @@ export class HaLongLivedAccessTokenDialog extends LitElement {
         @closed=${this.closeDialog}
       >
         <div>
-          <ha-textfield
+          <paper-input
             dialogInitialFocus
             .value=${this._params.token}
             .label=${this.hass.localize(
               "ui.panel.profile.long_lived_access_tokens.prompt_copy_token"
             )}
             type="text"
-            readOnly
-          ></ha-textfield>
+          ></paper-input>
           <div id="qr">
             ${this._qrCode
               ? this._qrCode
@@ -94,9 +93,6 @@ export class HaLongLivedAccessTokenDialog extends LitElement {
       css`
         #qr {
           text-align: center;
-        }
-        ha-textfield {
-          display: block;
         }
       `,
     ];

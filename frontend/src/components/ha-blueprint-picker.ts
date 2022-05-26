@@ -1,5 +1,5 @@
 import "@material/mwc-list/mwc-list-item";
-import "./ha-select";
+import "@material/mwc-select/mwc-select";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
@@ -24,7 +24,7 @@ class HaBluePrintPicker extends LitElement {
   @property({ type: Boolean }) public disabled = false;
 
   public open() {
-    const select = this.shadowRoot?.querySelector("ha-select");
+    const select = this.shadowRoot?.querySelector("mwc-select");
     if (select) {
       // @ts-expect-error
       select.menuOpen = true;
@@ -49,7 +49,7 @@ class HaBluePrintPicker extends LitElement {
       return html``;
     }
     return html`
-      <ha-select
+      <mwc-select
         .label=${this.label ||
         this.hass.localize("ui.components.blueprint-picker.label")}
         fixedMenuPosition
@@ -71,7 +71,7 @@ class HaBluePrintPicker extends LitElement {
             </mwc-list-item>
           `
         )}
-      </ha-select>
+      </mwc-select>
     `;
   }
 
@@ -101,7 +101,7 @@ class HaBluePrintPicker extends LitElement {
       :host {
         display: inline-block;
       }
-      ha-select {
+      mwc-select {
         width: 100%;
         min-width: 200px;
         display: block;

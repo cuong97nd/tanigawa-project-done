@@ -36,7 +36,6 @@ export class CloudForgotPassword extends LitElement {
       >
         <div class="content">
           <ha-card
-            outlined
             .header=${this.hass.localize(
               "ui.panel.config.cloud.forgot_password.subtitle"
             )}

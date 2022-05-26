@@ -1,3 +1,4 @@
+import "@polymer/paper-input/paper-textarea";
 import { PropertyValues, ReactiveElement } from "lit";
 import { property } from "lit/decorators";
 import { computeRTL } from "../../../../common/util/compute_rtl";

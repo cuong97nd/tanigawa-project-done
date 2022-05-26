@@ -1,5 +1,7 @@
 import "@material/mwc-button/mwc-button";
 import { mdiAlertCircle, mdiCheckCircle, mdiQrcodeScan } from "@mdi/js";
+import "@polymer/paper-input/paper-input";
+import type { PaperInputElement } from "@polymer/paper-input/paper-input";
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, query, state } from "lit/decorators";
@@ -9,30 +11,28 @@ import { HaCheckbox } from "../../../../../components/ha-checkbox";
 import "../../../../../components/ha-circular-progress";
 import { createCloseHeading } from "../../../../../components/ha-dialog";
 import "../../../../../components/ha-formfield";
-import "../../../../../components/ha-qr-scanner";
 import "../../../../../components/ha-radio";
 import "../../../../../components/ha-switch";
-import "../../../../../components/ha-textfield";
-import type { HaTextField } from "../../../../../components/ha-textfield";
 import {
+  zwaveGrantSecurityClasses,
   InclusionStrategy,
   MINIMUM_QR_STRING_LENGTH,
-  PlannedProvisioningEntry,
+  zwaveParseQrCode,
   provisionZwaveSmartStartNode,
   QRProvisioningInformation,
   RequestedGrant,
   SecurityClass,
   stopZwaveInclusion,
   subscribeAddZwaveNode,
-  ZWaveFeature,
-  zwaveGrantSecurityClasses,
-  zwaveParseQrCode,
   zwaveSupportsFeature,
   zwaveValidateDskAndEnterPin,
+  ZWaveFeature,
+  PlannedProvisioningEntry,
 } from "../../../../../data/zwave_js";
 import { haStyle, haStyleDialog } from "../../../../../resources/styles";
 import { HomeAssistant } from "../../../../../types";
 import { ZWaveJSAddNodeDialogParams } from "./show-dialog-zwave_js-add-node";
+import "../../../../../components/ha-qr-scanner";
 
 export interface ZWaveJSAddNodeDevice {
   id: string;
@@ -98,7 +98,7 @@ class DialogZWaveJSAddNode extends LitElement {
     this._startInclusion();
   }
 
-  @query("#pin-input") private _pinInput?: HaTextField;
+  @query("#pin-input") private _pinInput?: PaperInputElement;
 
   protected render(): TemplateResult {
     if (!this._entryId) {
@@ -202,11 +202,12 @@ class DialogZWaveJSAddNode extends LitElement {
                     : ""
                 }
                 <div class="flex-container">
-                <ha-textfield
+                <paper-input
                   label="PIN"
                   id="pin-input"
                   @keyup=${this._handlePinKeyUp}
-                ></ha-textfield>
+                  no-label-float
+                ></paper-input>
                 ${this._dsk}
                 </div>
                 <mwc-button
@@ -812,9 +813,6 @@ class DialogZWaveJSAddNode extends LitElement {
         ha-svg-icon {
           width: 68px;
           height: 48px;
-        }
-        ha-textfield {
-          display: block;
         }
         .secondary {
           color: var(--secondary-text-color);

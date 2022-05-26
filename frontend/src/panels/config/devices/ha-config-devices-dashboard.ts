@@ -16,9 +16,9 @@ import {
 } from "../../../components/data-table/ha-data-table";
 import "../../../components/entity/ha-battery-icon";
 import "../../../components/ha-button-menu";
-import "../../../components/ha-check-list-item";
 import "../../../components/ha-fab";
 import "../../../components/ha-icon-button";
+import "../../../components/ha-check-list-item";
 import { AreaRegistryEntry } from "../../../data/area_registry";
 import { ConfigEntry } from "../../../data/config_entries";
 import {
@@ -36,7 +36,6 @@ import "../../../layouts/hass-tabs-subpage-data-table";
 import { haStyle } from "../../../resources/styles";
 import { HomeAssistant, Route } from "../../../types";
 import { configSections } from "../ha-panel-config";
-import "../integrations/ha-integration-overflow-menu";
 import { showZWaveJSAddNodeDialog } from "../integrations/integration-panels/zwave_js/show-dialog-zwave_js-add-node";
 
 interface DeviceRowData extends DeviceRegistryEntry {
@@ -198,10 +197,7 @@ export class HaConfigDeviceDashboard extends LitElement {
         ),
         model: device.model || "<unknown>",
         manufacturer: device.manufacturer || "<unknown>",
-        area:
-          device.area_id && areaLookup[device.area_id]
-            ? areaLookup[device.area_id].name
-            : "—",
+        area: device.area_id ? areaLookup[device.area_id].name : "—",
         integration: device.config_entries.length
           ? device.config_entries
               .filter((entId) => entId in entryLookup)
@@ -409,10 +405,6 @@ export class HaConfigDeviceDashboard extends LitElement {
         (filteredConfigEntry.domain === "zha" ||
           filteredConfigEntry.domain === "zwave_js")}
       >
-        <ha-integration-overflow-menu
-          .hass=${this.hass}
-          slot="toolbar-icon"
-        ></ha-integration-overflow-menu>
         ${!filteredConfigEntry
           ? ""
           : filteredConfigEntry.domain === "zwave_js"
@@ -446,13 +438,6 @@ export class HaConfigDeviceDashboard extends LitElement {
             )}
             .path=${mdiFilterVariant}
           ></ha-icon-button>
-          ${this.narrow && activeFilters?.length
-            ? html`<mwc-list-item @click=${this._clearFilter}
-                >${this.hass.localize("ui.components.data-table.filtering_by")}
-                ${activeFilters.join(", ")}
-                <span class="clear">Clear</span></mwc-list-item
-              >`
-            : ""}
           <ha-check-list-item
             left
             @request-selected=${this._showDisabledChanged}
@@ -537,11 +522,6 @@ export class HaConfigDeviceDashboard extends LitElement {
       css`
         ha-button-menu {
           margin-left: 8px;
-        }
-        .clear {
-          color: var(--primary-color);
-          padding-left: 8px;
-          text-transform: uppercase;
         }
       `,
       haStyle,

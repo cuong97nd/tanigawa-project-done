@@ -1,9 +1,9 @@
-import { css, CSSResultGroup, html, LitElement, PropertyValues } from "lit";
+import "@polymer/paper-input/paper-input";
+import { html, LitElement, PropertyValues } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import { fireEvent } from "../../../../../common/dom/fire_event";
 import "../../../../../components/entity/ha-entity-picker";
 import "../../../../../components/ha-service-picker";
-import "../../../../../components/ha-textfield";
 import "../../../../../components/ha-yaml-editor";
 import type { HaYamlEditor } from "../../../../../components/ha-yaml-editor";
 import type { EventAction } from "../../../../../data/script";
@@ -40,17 +40,18 @@ export class HaEventAction extends LitElement implements ActionElement {
     const { event, event_data } = this.action;
 
     return html`
-      <ha-textfield
+      <paper-input
         .label=${this.hass.localize(
           "ui.panel.config.automation.editor.actions.type.event.event"
         )}
+        name="event"
         .value=${event}
-        @change=${this._eventChanged}
-      ></ha-textfield>
+        @value-changed=${this._eventChanged}
+      ></paper-input>
       <ha-yaml-editor
         .hass=${this.hass}
         .label=${this.hass.localize(
-          "ui.panel.config.automation.editor.actions.type.event.event_data"
+          "ui.panel.config.automation.editor.actions.type.event.service_data"
         )}
         .name=${"event_data"}
         .defaultValue=${event_data}
@@ -71,16 +72,8 @@ export class HaEventAction extends LitElement implements ActionElement {
   private _eventChanged(ev: CustomEvent): void {
     ev.stopPropagation();
     fireEvent(this, "value-changed", {
-      value: { ...this.action, event: (ev.target as any).value },
+      value: { ...this.action, event: ev.detail.value },
     });
-  }
-
-  static get styles(): CSSResultGroup {
-    return css`
-      ha-textfield {
-        display: block;
-      }
-    `;
   }
 }
 

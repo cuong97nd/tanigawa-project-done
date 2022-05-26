@@ -1,4 +1,4 @@
-import { mdiArrowLeft } from "@mdi/js";
+import { mdiArrowLeft, mdiUpload } from "@mdi/js";
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
 import "@material/mwc-button";
@@ -15,10 +15,10 @@ import { LocalStorage } from "../../common/decorators/local-storage";
 import { fireEvent, HASSDomEvent } from "../../common/dom/fire_event";
 import { navigate } from "../../common/navigate";
 import "../../components/ha-menu-button";
+import "../../components/ha-circular-progress";
 import "../../components/ha-icon-button";
-import "../../components/ha-icon-button-arrow-prev";
+import "../../components/ha-svg-icon";
 import "../../components/media-player/ha-media-player-browse";
-import "../../components/media-player/ha-media-manage-button";
 import type {
   HaMediaPlayerBrowse,
   MediaPlayerItemId,
@@ -29,14 +29,14 @@ import {
   MediaPlayerItem,
 } from "../../data/media-player";
 import {
-  ResolvedMediaSource,
+  isLocalMediaSourceContentId,
   resolveMediaSource,
+  uploadLocalMedia,
 } from "../../data/media_source";
 import "../../layouts/ha-app-layout";
 import { haStyle } from "../../resources/styles";
 import type { HomeAssistant, Route } from "../../types";
 import "./ha-bar-media-player";
-import type { BarMediaPlayer } from "./ha-bar-media-player";
 import { showWebBrowserPlayMediaDialog } from "./show-media-player-dialog";
 import { showAlertDialog } from "../../dialogs/generic/show-dialog-box";
 import {
@@ -65,6 +65,8 @@ class PanelMediaBrowser extends LitElement {
 
   @state() _currentItem?: MediaPlayerItem;
 
+  @state() _uploading = 0;
+
   private _navigateIds: MediaPlayerItemId[] = [
     {
       media_content_id: undefined,
@@ -77,8 +79,6 @@ class PanelMediaBrowser extends LitElement {
 
   @query("ha-media-player-browse") private _browser!: HaMediaPlayerBrowse;
 
-  @query("ha-bar-media-player") private _player!: BarMediaPlayer;
-
   protected render(): TemplateResult {
     return html`
       <ha-app-layout>
@@ -86,10 +86,10 @@ class PanelMediaBrowser extends LitElement {
           <app-toolbar>
             ${this._navigateIds.length > 1
               ? html`
-                  <ha-icon-button-arrow-prev
+                  <ha-icon-button
                     .path=${mdiArrowLeft}
                     @click=${this._goBack}
-                  ></ha-icon-button-arrow-prev>
+                  ></ha-icon-button>
                 `
               : html`
                   <ha-menu-button
@@ -104,11 +104,43 @@ class PanelMediaBrowser extends LitElement {
                   )
                 : this._currentItem.title}
             </div>
-            <ha-media-manage-button
-              .hass=${this.hass}
-              .currentItem=${this._currentItem}
-              @media-refresh=${this._refreshMedia}
-            ></ha-media-manage-button>
+            ${this._currentItem &&
+            isLocalMediaSourceContentId(
+              this._currentItem.media_content_id || ""
+            )
+              ? html`
+                  <mwc-button
+                    .label=${this._uploading > 0
+                      ? this.hass.localize(
+                          "ui.components.media-browser.file_management.uploading",
+                          {
+                            count: this._uploading,
+                          }
+                        )
+                      : this.hass.localize(
+                          "ui.components.media-browser.file_management.add_media"
+                        )}
+                    .disabled=${this._uploading > 0}
+                    @click=${this._startUpload}
+                  >
+                    ${this._uploading > 0
+                      ? html`
+                          <ha-circular-progress
+                            size="tiny"
+                            active
+                            alt=""
+                            slot="icon"
+                          ></ha-circular-progress>
+                        `
+                      : html`
+                          <ha-svg-icon
+                            .path=${mdiUpload}
+                            slot="icon"
+                          ></ha-svg-icon>
+                        `}
+                  </mwc-button>
+                `
+              : ""}
           </app-toolbar>
         </app-header>
         <ha-media-player-browse
@@ -171,12 +203,11 @@ class PanelMediaBrowser extends LitElement {
         media_content_id: undefined,
       },
       ...navigateIdsEncoded.map((navigateId) => {
-        const decoded = decodeURIComponent(navigateId);
-        // Don't use split because media_content_id could contain commas
-        const delimiter = decoded.indexOf(",");
+        const [media_content_type, media_content_id] =
+          decodeURIComponent(navigateId).split(",");
         return {
-          media_content_type: decoded.substring(0, delimiter),
-          media_content_id: decoded.substring(delimiter + 1),
+          media_content_type,
+          media_content_id,
         };
       }),
     ];
@@ -204,23 +235,15 @@ class PanelMediaBrowser extends LitElement {
     ev: HASSDomEvent<MediaPickedEvent>
   ): Promise<void> {
     const item = ev.detail.item;
-
     if (this._entityId !== BROWSER_PLAYER) {
-      this._player.showResolvingNewMediaPicked();
-      try {
-        await this.hass!.callService("media_player", "play_media", {
-          entity_id: this._entityId,
-          media_content_id: item.media_content_id,
-          media_content_type: item.media_content_type,
-        });
-      } catch (err) {
-        this._player.hideResolvingNewMediaPicked();
-      }
+      this.hass!.callService("media_player", "play_media", {
+        entity_id: this._entityId,
+        media_content_id: item.media_content_id,
+        media_content_type: item.media_content_type,
+      });
       return;
     }
 
-    // We won't cancel current media being played if we're going to
-    // open a camera.
     if (isCameraMediaSource(item.media_content_id)) {
       fireEvent(this, "hass-more-info", {
         entityId: getEntityIdFromCameraMediaSource(item.media_content_id),
@@ -228,23 +251,15 @@ class PanelMediaBrowser extends LitElement {
       return;
     }
 
-    this._player.showResolvingNewMediaPicked();
-    let resolvedUrl: ResolvedMediaSource;
-    try {
-      resolvedUrl = await resolveMediaSource(this.hass, item.media_content_id);
-    } catch (err: any) {
-      showAlertDialog(this, {
-        title: this.hass.localize(
-          "ui.components.media-browser.media_browsing_error"
-        ),
-        text: err.message,
-      });
-      this._player.hideResolvingNewMediaPicked();
-      return;
-    }
+    const resolvedUrl = await resolveMediaSource(
+      this.hass,
+      item.media_content_id
+    );
 
     if (resolvedUrl.mime_type.startsWith("audio/")) {
-      this._player.playItem(item, resolvedUrl);
+      await this.shadowRoot!.querySelector("ha-bar-media-player")!.playItem(
+        item
+      );
       return;
     }
 
@@ -254,7 +269,6 @@ class PanelMediaBrowser extends LitElement {
       title: item.title,
       can_play: item.can_play,
     });
-    this._player.hideResolvingNewMediaPicked();
   }
 
   private _playerPicked(ev) {
@@ -265,21 +279,57 @@ class PanelMediaBrowser extends LitElement {
     navigate(createMediaPanelUrl(entityId, this._navigateIds));
   }
 
-  private _refreshMedia() {
-    this._browser.refresh();
+  private async _startUpload() {
+    if (this._uploading > 0) {
+      return;
+    }
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "audio/*,video/*,image/*";
+    input.multiple = true;
+    input.addEventListener(
+      "change",
+      async () => {
+        const files = input.files!;
+        const target = this._currentItem!.media_content_id!;
+
+        for (let i = 0; i < files.length; i++) {
+          this._uploading = files.length - i;
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            await uploadLocalMedia(this.hass, target, files[i]);
+          } catch (err: any) {
+            showAlertDialog(this, {
+              text: this.hass.localize(
+                "ui.components.media-browser.file_management.upload_failed",
+                {
+                  reason: err.message || err,
+                }
+              ),
+            });
+            break;
+          }
+        }
+        this._uploading = 0;
+        await this._browser.refresh();
+      },
+      { once: true }
+    );
+    input.click();
   }
 
   static get styles(): CSSResultGroup {
     return [
       haStyle,
       css`
-        app-toolbar {
+        app-toolbar mwc-button {
           --mdc-theme-primary: var(--app-header-text-color);
+          /* We use icon + text to show disabled state */
+          --mdc-button-disabled-ink-color: var(--app-header-text-color);
         }
 
         ha-media-player-browse {
           height: calc(100vh - (100px + var(--header-height)));
-          direction: ltr;
         }
 
         :host([narrow]) ha-media-player-browse {
@@ -291,6 +341,11 @@ class PanelMediaBrowser extends LitElement {
           bottom: 0;
           left: 0;
           right: 0;
+        }
+
+        ha-svg-icon[slot="icon"],
+        ha-circular-progress[slot="icon"] {
+          vertical-align: middle;
         }
       `,
     ];

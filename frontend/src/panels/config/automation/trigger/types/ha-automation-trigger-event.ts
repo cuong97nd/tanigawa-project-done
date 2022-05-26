@@ -1,7 +1,7 @@
-import { css, CSSResultGroup, html, LitElement } from "lit";
+import "@polymer/paper-input/paper-input";
+import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators";
 import { fireEvent } from "../../../../../common/dom/fire_event";
-import "../../../../../components/ha-textfield";
 import "../../../../../components/ha-yaml-editor";
 import "../../../../../components/user/ha-users-picker";
 import { EventTrigger } from "../../../../../data/automation";
@@ -24,14 +24,14 @@ export class HaEventTrigger extends LitElement implements TriggerElement {
   protected render() {
     const { event_type, event_data, context } = this.trigger;
     return html`
-      <ha-textfield
+      <paper-input
         .label=${this.hass.localize(
           "ui.panel.config.automation.editor.triggers.type.event.event_type"
         )}
         name="event_type"
         .value=${event_type}
-        @change=${this._valueChanged}
-      ></ha-textfield>
+        @value-changed=${this._valueChanged}
+      ></paper-input>
       <ha-yaml-editor
         .hass=${this.hass}
         .label=${this.hass.localize(
@@ -96,14 +96,6 @@ export class HaEventTrigger extends LitElement implements TriggerElement {
     fireEvent(this, "value-changed", {
       value,
     });
-  }
-
-  static get styles(): CSSResultGroup {
-    return css`
-      ha-textfield {
-        display: block;
-      }
-    `;
   }
 }
 

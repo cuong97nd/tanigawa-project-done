@@ -15,7 +15,9 @@ import { ZWaveJSReinterviewNodeDialogParams } from "./show-dialog-zwave_js-reint
 class DialogZWaveJSReinterviewNode extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @state() private device_id?: string;
+  @state() private entry_id?: string;
+
+  @state() private node_id?: number;
 
   @state() private _status?: string;
 
@@ -27,11 +29,12 @@ class DialogZWaveJSReinterviewNode extends LitElement {
     params: ZWaveJSReinterviewNodeDialogParams
   ): Promise<void> {
     this._stages = undefined;
-    this.device_id = params.device_id;
+    this.entry_id = params.entry_id;
+    this.node_id = params.node_id;
   }
 
   protected render(): TemplateResult {
-    if (!this.device_id) {
+    if (!this.entry_id) {
       return html``;
     }
 
@@ -156,7 +159,8 @@ class DialogZWaveJSReinterviewNode extends LitElement {
     }
     this._subscribed = reinterviewZwaveNode(
       this.hass,
-      this.device_id!,
+      this.entry_id!,
+      this.node_id!,
       this._handleMessage.bind(this)
     );
   }
@@ -190,7 +194,8 @@ class DialogZWaveJSReinterviewNode extends LitElement {
   }
 
   public closeDialog(): void {
-    this.device_id = undefined;
+    this.entry_id = undefined;
+    this.node_id = undefined;
     this._status = undefined;
     this._stages = undefined;
 

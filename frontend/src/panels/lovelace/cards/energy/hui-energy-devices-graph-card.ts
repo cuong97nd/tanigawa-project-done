@@ -6,7 +6,7 @@ import {
   ScatterDataPoint,
 } from "chart.js";
 import { getRelativePosition } from "chart.js/helpers";
-import { addHours, differenceInDays } from "date-fns/esm";
+import { addHours, differenceInDays } from "date-fns";
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, query, state } from "lit/decorators";
@@ -48,8 +48,6 @@ export class HuiEnergyDevicesGraphCard
   @state() private _chartData: ChartData = { datasets: [] };
 
   @query("ha-chart-base") private _chart?: HaChartBase;
-
-  protected hassSubscribeRequiredHostProps = ["_config"];
 
   public hassSubscribe(): UnsubscribeFunc[] {
     return [

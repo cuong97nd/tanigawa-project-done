@@ -153,7 +153,7 @@ class CloudAlexa extends SubscribeMixin(LitElement) {
       ></ha-icon-button>`;
 
       target.push(html`
-        <ha-card outlined>
+        <ha-card>
           <div class="card-content">
             <div class="top-line">
               <state-info

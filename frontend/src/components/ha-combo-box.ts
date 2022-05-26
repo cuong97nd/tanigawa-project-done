@@ -64,8 +64,6 @@ export class HaComboBox extends LitElement {
 
   @property() public validationMessage?: string;
 
-  @property() public helper?: string;
-
   @property({ attribute: "error-message" }) public errorMessage?: string;
 
   @property({ type: Boolean }) public invalid?: boolean;
@@ -89,8 +87,6 @@ export class HaComboBox extends LitElement {
 
   @property({ type: Boolean }) public disabled?: boolean;
 
-  @property({ type: Boolean }) public required?: boolean;
-
   @property({ type: Boolean, reflect: true, attribute: "opened" })
   private _opened?: boolean;
 
@@ -112,22 +108,17 @@ export class HaComboBox extends LitElement {
     return this._comboBox.selectedItem;
   }
 
-  public setInputValue(value: string) {
-    this._comboBox.value = value;
-  }
-
   protected render(): TemplateResult {
     return html`
       <vaadin-combo-box-light
         .itemValuePath=${this.itemValuePath}
         .itemIdPath=${this.itemIdPath}
         .itemLabelPath=${this.itemLabelPath}
-        .items=${this.items}
         .value=${this.value || ""}
+        .items=${this.items}
         .filteredItems=${this.filteredItems}
         .allowCustomValue=${this.allowCustomValue}
         .disabled=${this.disabled}
-        .required=${this.required}
         ${comboBoxRenderer(this.renderer || this._defaultRowRenderer)}
         @opened-changed=${this._openedChanged}
         @filter-changed=${this._filterChanged}
@@ -138,7 +129,6 @@ export class HaComboBox extends LitElement {
           .label=${this.label}
           .placeholder=${this.placeholder}
           .disabled=${this.disabled}
-          .required=${this.required}
           .validationMessage=${this.validationMessage}
           .errorMessage=${this.errorMessage}
           class="input"
@@ -149,8 +139,6 @@ export class HaComboBox extends LitElement {
           .suffix=${html`<div style="width: 28px;"></div>`}
           .icon=${this.icon}
           .invalid=${this.invalid}
-          .helper=${this.helper}
-          helperPersistent
         >
           <slot name="icon" slot="leadingIcon"></slot>
         </ha-textfield>
@@ -241,9 +229,6 @@ export class HaComboBox extends LitElement {
       .toggle-button {
         right: 12px;
         top: -10px;
-        inset-inline-start: initial;
-        inset-inline-end: 12px;
-        direction: var(--direction);
       }
       :host([opened]) .toggle-button {
         color: var(--primary-color);
@@ -252,9 +237,6 @@ export class HaComboBox extends LitElement {
         --mdc-icon-size: 20px;
         top: -7px;
         right: 36px;
-        inset-inline-start: initial;
-        inset-inline-end: 36px;
-        direction: var(--direction);
       }
     `;
   }

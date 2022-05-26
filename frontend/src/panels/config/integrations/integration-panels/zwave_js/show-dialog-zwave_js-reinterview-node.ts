@@ -1,7 +1,8 @@
 import { fireEvent } from "../../../../../common/dom/fire_event";
 
 export interface ZWaveJSReinterviewNodeDialogParams {
-  device_id: string;
+  entry_id: string;
+  node_id: number;
 }
 
 export const loadReinterviewNodeDialog = () =>

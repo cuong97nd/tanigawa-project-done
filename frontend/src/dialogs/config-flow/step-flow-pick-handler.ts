@@ -15,7 +15,7 @@ import memoizeOne from "memoize-one";
 import { isComponentLoaded } from "../../common/config/is_component_loaded";
 import { fireEvent } from "../../common/dom/fire_event";
 import { navigate } from "../../common/navigate";
-import "../../components/search-input";
+import "../../common/search/search-input";
 import { caseInsensitiveStringCompare } from "../../common/string/compare";
 import { LocalizeFunc } from "../../common/translations/localize";
 import "../../components/ha-icon-next";
@@ -26,13 +26,11 @@ import { HomeAssistant } from "../../types";
 import { brandsUrl } from "../../util/brands-url";
 import { documentationUrl } from "../../util/documentation-url";
 import { configFlowContentStyles } from "./styles";
-import { FlowHandlers } from "./show-dialog-data-entry-flow";
 
 interface HandlerObj {
   name: string;
   slug: string;
   is_add?: boolean;
-  is_helper?: boolean;
 }
 
 declare global {
@@ -48,7 +46,7 @@ declare global {
 class StepFlowPickHandler extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @property({ attribute: false }) public handlers!: FlowHandlers;
+  @property({ attribute: false }) public handlers!: string[];
 
   @property() public initialFilter?: string;
 
@@ -59,12 +57,8 @@ class StepFlowPickHandler extends LitElement {
   private _height?: number;
 
   private _filterHandlers = memoizeOne(
-    (
-      h: FlowHandlers,
-      filter?: string,
-      _localize?: LocalizeFunc
-    ): [HandlerObj[], HandlerObj[]] => {
-      const integrations: HandlerObj[] = h.integrations.map((handler) => ({
+    (h: string[], filter?: string, _localize?: LocalizeFunc) => {
+      const handlers: HandlerObj[] = h.map((handler) => ({
         name: domainToName(this.hass.localize, handler),
         slug: handler,
       }));
@@ -76,31 +70,17 @@ class StepFlowPickHandler extends LitElement {
           minMatchCharLength: 2,
           threshold: 0.2,
         };
-        const helpers: HandlerObj[] = h.helpers.map((handler) => ({
-          name: domainToName(this.hass.localize, handler),
-          slug: handler,
-          is_helper: true,
-        }));
-        return [
-          new Fuse(integrations, options)
-            .search(filter)
-            .map((result) => result.item),
-          new Fuse(helpers, options)
-            .search(filter)
-            .map((result) => result.item),
-        ];
+        const fuse = new Fuse(handlers, options);
+        return fuse.search(filter).map((result) => result.item);
       }
-      return [
-        integrations.sort((a, b) =>
-          caseInsensitiveStringCompare(a.name, b.name)
-        ),
-        [],
-      ];
+      return handlers.sort((a, b) =>
+        caseInsensitiveStringCompare(a.name, b.name)
+      );
     }
   );
 
   protected render(): TemplateResult {
-    const [integrations, helpers] = this._getHandlers();
+    const handlers = this._getHandlers();
 
     const addDeviceRows: HandlerObj[] = ["zha", "zwave_js"]
       .filter((domain) => isComponentLoaded(this.hass, domain))
@@ -135,8 +115,8 @@ class StepFlowPickHandler extends LitElement {
               <li divider padded class="divider" role="separator"></li>
             `
           : ""}
-        ${integrations.length
-          ? integrations.map((handler) => this._renderRow(handler))
+        ${handlers.length
+          ? handlers.map((handler) => this._renderRow(handler))
           : html`
               <p>
                 ${this.hass.localize(
@@ -159,12 +139,6 @@ class StepFlowPickHandler extends LitElement {
                 >.
               </p>
             `}
-        ${helpers.length
-          ? html`
-              <li divider padded class="divider" role="separator"></li>
-              ${helpers.map((handler) => this._renderRow(handler))}
-            `
-          : ""}
       </mwc-list>
     `;
   }
@@ -188,7 +162,7 @@ class StepFlowPickHandler extends LitElement {
           })}
           referrerpolicy="no-referrer"
         />
-        <span>${handler.name} ${handler.is_helper ? " (helper)" : ""}</span>
+        <span>${handler.name}</span>
         ${handler.is_add ? "" : html`<ha-icon-next slot="meta"></ha-icon-next>`}
       </mwc-list-item>
     `;
@@ -242,28 +216,20 @@ class StepFlowPickHandler extends LitElement {
 
     if (handler.is_add) {
       if (handler.slug === "zwave_js") {
-        const entries = await getConfigEntries(this.hass, {
-          domain: "zwave_js",
-        });
+        const entries = await getConfigEntries(this.hass);
+        const entry = entries.find((ent) => ent.domain === "zwave_js");
 
-        if (!entries.length) {
+        if (!entry) {
           return;
         }
 
         showZWaveJSAddNodeDialog(this, {
-          entry_id: entries[0].entry_id,
+          entry_id: entry.entry_id,
         });
       } else if (handler.slug === "zha") {
         navigate("/config/zha/add");
       }
 
-      // This closes dialog.
-      fireEvent(this, "flow-update");
-      return;
-    }
-
-    if (handler.is_helper) {
-      navigate(`/config/helpers/add?domain=${handler.slug}`);
       // This closes dialog.
       fireEvent(this, "flow-update");
       return;
@@ -283,7 +249,7 @@ class StepFlowPickHandler extends LitElement {
 
     if (handlers.length > 0) {
       fireEvent(this, "handler-picked", {
-        handler: handlers[0][0].slug,
+        handler: handlers[0].slug,
       });
     }
   }
@@ -311,8 +277,7 @@ class StepFlowPickHandler extends LitElement {
           border-bottom-color: var(--divider-color);
         }
         h2 {
-          padding-inline-end: 66px;
-          direction: var(--direction);
+          padding-right: 66px;
         }
         @media all and (max-height: 900px) {
           mwc-list {

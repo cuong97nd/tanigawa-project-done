@@ -57,7 +57,7 @@ export class HuiActionEditor extends LitElement {
 
     return html`
       <div class="dropdown">
-        <ha-select
+        <mwc-select
           .label=${this.label}
           .configValue=${"action"}
           @selected=${this._actionPicked}
@@ -80,7 +80,7 @@ export class HuiActionEditor extends LitElement {
               </mwc-list-item>
             `
           )}
-        </ha-select>
+        </mwc-select>
         ${this.tooltipText
           ? html`
               <ha-help-tooltip .label=${this.tooltipText}></ha-help-tooltip>
@@ -198,11 +198,8 @@ export class HuiActionEditor extends LitElement {
         position: absolute;
         right: 40px;
         top: 16px;
-        inset-inline-start: initial;
-        inset-inline-end: 40px;
-        direction: var(--direction);
       }
-      ha-select,
+      mwc-select,
       ha-textfield {
         width: 100%;
       }

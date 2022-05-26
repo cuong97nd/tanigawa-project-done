@@ -23,6 +23,8 @@ import {
 import { litLocalizeLiteMixin } from "../mixins/lit-localize-lite-mixin";
 import "./ha-password-manager-polyfill";
 
+console.log("custom");
+
 type State = "loading" | "error" | "step";
 
 class HaAuthFlow extends litLocalizeLiteMixin(LitElement) {
@@ -148,8 +150,8 @@ class HaAuthFlow extends litLocalizeLiteMixin(LitElement) {
               .disabled=${this._submitting}
             >
               ${this._step.type === "form"
-                ? this.localize("ui.panel.page-authorize.form.next")
-                : this.localize("ui.panel.page-authorize.form.start_over")}
+            ? this.localize("ui.panel.page-authorize.form.next")
+            : this.localize("ui.panel.page-authorize.form.start_over")}
             </mwc-button>
           </div>
         `;
@@ -157,10 +159,10 @@ class HaAuthFlow extends litLocalizeLiteMixin(LitElement) {
         return html`
           <ha-alert alert-type="error">
             ${this.localize(
-              "ui.panel.page-authorize.form.error",
-              "error",
-              this._errorMessage
-            )}
+          "ui.panel.page-authorize.form.error",
+          "error",
+          this._errorMessage
+        )}
           </ha-alert>
           <div class="action">
             <mwc-button raised @click=${this._startOver}>
@@ -188,8 +190,8 @@ class HaAuthFlow extends litLocalizeLiteMixin(LitElement) {
             allowsvg
             breaks
             .content=${this.localize(
-              `ui.panel.page-authorize.form.providers.${step.handler[0]}.abort.${step.reason}`
-            )}
+          `ui.panel.page-authorize.form.providers.${step.handler[0]}.abort.${step.reason}`
+        )}
           ></ha-markdown>
         `;
       case "form":
@@ -212,7 +214,7 @@ class HaAuthFlow extends litLocalizeLiteMixin(LitElement) {
             @value-changed=${this._stepDataChanged}
           ></ha-form>
           ${this.clientId === genClientId() &&
-          !["select_mfa_module", "mfa"].includes(step.step_id)
+            !["select_mfa_module", "mfa"].includes(step.step_id)
             ? html`
                 <ha-formfield
                   class="store-token"

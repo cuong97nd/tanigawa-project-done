@@ -1,9 +1,8 @@
-import { object, optional, number, string, boolean } from "superstruct";
+import { object, optional, number, string } from "superstruct";
 
 export const baseTriggerStruct = object({
   platform: string(),
   id: optional(string()),
-  enabled: optional(boolean()),
 });
 
 export const forDictStruct = object({

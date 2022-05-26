@@ -1,1 +1,5 @@
-2022-05-24 13:11:28 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration webrtc which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2022-05-26 13:47:36 WARNING (SyncWorker_0) [homeassistant.loader] We found a custom integration webrtc which has not been tested by Home Assistant. This component might cause stability problems, be sure to disable it if you experience issues with Home Assistant
+2022-05-26 13:48:16 ERROR (MainThread) [frontend.js_dev.latest.202202140] http://192.168.42.134:8123/logbook:0:0 ResizeObserver loop limit exceeded
+2022-05-26 13:51:11 ERROR (MainThread) [frontend.js_dev.latest.202202140] http://192.168.42.134:8123/logbook:0:0 ResizeObserver loop limit exceeded
+2022-05-26 13:53:50 ERROR (MainThread) [frontend.js_dev.latest.202202140] webpack-internal:///./node_modules/leaflet/dist/leaflet-src.js:2281:15 Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+2022-05-26 13:53:52 ERROR (MainThread) [frontend.js_dev.latest.202202140] webpack-internal:///./node_modules/leaflet/dist/leaflet-src.js:2281:15 Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')

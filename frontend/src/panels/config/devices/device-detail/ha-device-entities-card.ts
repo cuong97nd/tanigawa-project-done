@@ -40,7 +40,7 @@ export class HaDeviceEntitiesCard extends LitElement {
 
   @property() public entities!: EntityRegistryStateEntry[];
 
-  @property() public showHidden = false;
+  @property() public showDisabled = false;
 
   @state() private _extDisabledEntityEntries?: Record<
     string,
@@ -60,77 +60,77 @@ export class HaDeviceEntitiesCard extends LitElement {
   }
 
   protected render(): TemplateResult {
-    if (!this.entities.length) {
-      return html`
-        <ha-card outlined .header=${this.header}>
-          <div class="empty card-content">
-            ${this.hass.localize("ui.panel.config.devices.entities.none")}
-          </div>
-        </ha-card>
-      `;
-    }
-
-    const shownEntities: EntityRegistryStateEntry[] = [];
-    const hiddenEntities: EntityRegistryStateEntry[] = [];
+    const disabledEntities: EntityRegistryStateEntry[] = [];
     this._entityRows = [];
-
-    this.entities.forEach((entry) => {
-      if (entry.disabled_by) {
-        if (this._extDisabledEntityEntries) {
-          hiddenEntities.push(
-            this._extDisabledEntityEntries[entry.entity_id] || entry
-          );
-        } else {
-          hiddenEntities.push(entry);
-        }
-      } else {
-        shownEntities.push(entry);
-      }
-    });
-
     return html`
-      <ha-card outlined .header=${this.header}>
-        <div id="entities" @hass-more-info=${this._overrideMoreInfo}>
-          ${shownEntities.map((entry) =>
-            this.hass.states[entry.entity_id]
-              ? this._renderEntity(entry)
-              : this._renderEntry(entry)
-          )}
-        </div>
-        ${hiddenEntities.length
-          ? !this.showHidden
-            ? html`
-                <button class="show-more" @click=${this._toggleShowHidden}>
+      <ha-card .header=${this.header}>
+        ${this.entities.length
+          ? html`
+              <div id="entities" @hass-more-info=${this._overrideMoreInfo}>
+                ${this.entities.map((entry: EntityRegistryStateEntry) => {
+                  if (entry.disabled_by) {
+                    if (this._extDisabledEntityEntries) {
+                      disabledEntities.push(
+                        this._extDisabledEntityEntries[entry.entity_id] || entry
+                      );
+                    } else {
+                      disabledEntities.push(entry);
+                    }
+                    return "";
+                  }
+                  return this.hass.states[entry.entity_id]
+                    ? this._renderEntity(entry)
+                    : this._renderEntry(entry);
+                })}
+              </div>
+              ${disabledEntities.length
+                ? !this.showDisabled
+                  ? html`
+                      <button
+                        class="show-more"
+                        @click=${this._toggleShowDisabled}
+                      >
+                        ${this.hass.localize(
+                          "ui.panel.config.devices.entities.disabled_entities",
+                          "count",
+                          disabledEntities.length
+                        )}
+                      </button>
+                    `
+                  : html`
+                      ${disabledEntities.map((entry) =>
+                        this._renderEntry(entry)
+                      )}
+                      <button
+                        class="show-more"
+                        @click=${this._toggleShowDisabled}
+                      >
+                        ${this.hass.localize(
+                          "ui.panel.config.devices.entities.hide_disabled"
+                        )}
+                      </button>
+                    `
+                : ""}
+              <div class="card-actions">
+                <mwc-button @click=${this._addToLovelaceView}>
                   ${this.hass.localize(
-                    "ui.panel.config.devices.entities.hidden_entities",
-                    "count",
-                    hiddenEntities.length
+                    "ui.panel.config.devices.entities.add_entities_lovelace"
                   )}
-                </button>
-              `
-            : html`
-                ${hiddenEntities.map((entry) => this._renderEntry(entry))}
-                <button class="show-more" @click=${this._toggleShowHidden}>
-                  ${this.hass.localize(
-                    "ui.panel.config.devices.entities.hide_disabled"
-                  )}
-                </button>
-              `
-          : ""}
-        <div class="card-actions">
-          <mwc-button @click=${this._addToLovelaceView}>
-            ${this.hass.localize(
-              "ui.panel.config.devices.entities.add_entities_lovelace"
-            )}
-          </mwc-button>
-        </div>
+                </mwc-button>
+              </div>
+            `
+          : html`
+              <div class="empty card-content">
+                ${this.hass.localize("ui.panel.config.devices.entities.none")}
+              </div>
+            `}
       </ha-card>
     `;
   }
 
-  private _toggleShowHidden() {
-    this.showHidden = !this.showHidden;
-    if (!this.showHidden || this._extDisabledEntityEntries !== undefined) {
+  private _toggleShowDisabled() {
+    this.showDisabled = !this.showDisabled;
+    if (!this.showDisabled || this._extDisabledEntityEntries !== undefined) {
       return;
     }
     this._extDisabledEntityEntries = {};
@@ -167,11 +167,7 @@ export class HaDeviceEntitiesCard extends LitElement {
         computeStateName(stateObj),
         this.deviceName.toLowerCase()
       );
-      if (entry.hidden_by) {
-        config.name = `${
-          name || computeStateName(stateObj)
-        } (${this.hass.localize("ui.panel.config.devices.entities.hidden")})`;
-      } else if (name) {
+      if (name) {
         config.name = name;
       }
     }

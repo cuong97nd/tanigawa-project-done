@@ -3,8 +3,8 @@ import { customElement, property } from "lit/decorators";
 import { atLeastVersion } from "../../src/common/config/version";
 import { applyThemesOnElement } from "../../src/common/dom/apply_themes_on_element";
 import { fireEvent } from "../../src/common/dom/fire_event";
-import { mainWindow } from "../../src/common/dom/get_main_window";
 import { isNavigationClick } from "../../src/common/dom/is-navigation-click";
+import { mainWindow } from "../../src/common/dom/get_main_window";
 import { navigate } from "../../src/common/navigate";
 import { HassioPanelInfo } from "../../src/data/hassio/supervisor";
 import { Supervisor } from "../../src/data/supervisor/supervisor";
@@ -73,18 +73,6 @@ export class HassioMain extends SupervisorBaseElement {
       });
     });
 
-    // Forward keydown events to the main window for quickbar access
-    document.body.addEventListener("keydown", (ev: KeyboardEvent) => {
-      if (ev.altKey || ev.ctrlKey || ev.shiftKey || ev.metaKey) {
-        // Ignore if modifier keys are pressed
-        return;
-      }
-      // @ts-ignore
-      fireEvent(mainWindow, "hass-quick-bar-trigger", ev, {
-        bubbles: false,
-      });
-    });
-
     makeDialogManager(this, this.shadowRoot!);
   }
 
@@ -133,8 +121,7 @@ export class HassioMain extends SupervisorBaseElement {
       this.parentElement,
       this.hass.themes,
       themeName,
-      themeSettings,
-      true
+      themeSettings
     );
   }
 }

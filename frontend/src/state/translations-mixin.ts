@@ -1,6 +1,6 @@
 import { atLeastVersion } from "../common/config/version";
 import { computeLocalize, LocalizeFunc } from "../common/translations/localize";
-import { computeRTLDirection } from "../common/util/compute_rtl";
+import { computeRTL } from "../common/util/compute_rtl";
 import { debounce } from "../common/util/debounce";
 import {
   getHassTranslations,
@@ -19,7 +19,6 @@ import {
   getUserLocale,
 } from "../util/common-translation";
 import { HassBaseEl } from "./hass-base-mixin";
-import { fireEvent } from "../common/dom/fire_event";
 
 declare global {
   // for fire event
@@ -33,7 +32,6 @@ declare global {
     "hass-time-format-select": {
       time_format: TimeFormat;
     };
-    "translations-updated": undefined;
   }
 }
 
@@ -180,25 +178,10 @@ export default <T extends Constructor<HassBaseEl>>(superClass: T) =>
 
     private _applyTranslations(hass: HomeAssistant) {
       document.querySelector("html")!.setAttribute("lang", hass.language);
-      this._applyDirection(hass);
+      this.style.direction = computeRTL(hass) ? "rtl" : "ltr";
       this._loadCoreTranslations(hass.language);
       this.__loadedFragmetTranslations = new Set();
       this._loadFragmentTranslations(hass.language, hass.panelUrl);
-    }
-
-    private _applyDirection(hass: HomeAssistant) {
-      const direction = computeRTLDirection(hass);
-      this.style.direction = direction;
-      document.dir = direction;
-      this.style.setProperty("--direction", direction);
-      this.style.setProperty(
-        "--float-start",
-        direction === "ltr" ? "left" : "right"
-      );
-      this.style.setProperty(
-        "--float-end",
-        direction === "ltr" ? "right" : "left"
-      );
     }
 
     /**
@@ -246,22 +229,12 @@ export default <T extends Constructor<HassBaseEl>>(superClass: T) =>
         };
       }
 
-      let integrationsToLoad: string[] = [];
-
       // Check if already loaded
       if (!force) {
-        if (integration && Array.isArray(integration)) {
-          integrationsToLoad = integration.filter(
-            (i) => !alreadyLoaded.integrations.includes(i)
-          );
-          if (!integrationsToLoad.length) {
-            return this.hass!.localize;
-          }
-        } else if (integration) {
+        if (integration) {
           if (alreadyLoaded.integrations.includes(integration)) {
             return this.hass!.localize;
           }
-          integrationsToLoad = [integration];
         } else if (
           configFlow ? alreadyLoaded.configFlow : alreadyLoaded.setup
         ) {
@@ -270,8 +243,10 @@ export default <T extends Constructor<HassBaseEl>>(superClass: T) =>
       }
 
       // Add to cache
-      if (integrationsToLoad.length) {
-        alreadyLoaded.integrations.push(...integrationsToLoad);
+      if (integration) {
+        if (!alreadyLoaded.integrations.includes(integration)) {
+          alreadyLoaded.integrations.push(integration);
+        }
       } else {
         alreadyLoaded.setup = true;
         if (configFlow) {
@@ -283,7 +258,7 @@ export default <T extends Constructor<HassBaseEl>>(superClass: T) =>
         this.hass!,
         language,
         category,
-        integrationsToLoad.length ? integrationsToLoad : undefined,
+        integration,
         configFlow
       );
 
@@ -377,7 +352,6 @@ export default <T extends Constructor<HassBaseEl>>(superClass: T) =>
           localize,
         });
       }
-      fireEvent(this, "translations-updated");
     }
 
     private _refetchCachedHassTranslations(

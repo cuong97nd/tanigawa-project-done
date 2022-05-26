@@ -42,9 +42,6 @@ class PanelDeveloperTools extends LitElement {
             .selected=${page}
             @iron-activate=${this.handlePageSelected}
           >
-            <paper-tab page-name="yaml">
-              ${this.hass.localize("ui.panel.developer-tools.tabs.yaml.title")}
-            </paper-tab>
             <paper-tab page-name="state">
               ${this.hass.localize(
                 "ui.panel.developer-tools.tabs.states.title"

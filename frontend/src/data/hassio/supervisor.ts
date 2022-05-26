@@ -1,7 +1,7 @@
 import { atLeastVersion } from "../../common/config/version";
 import { HomeAssistant, PanelInfo } from "../../types";
 import { SupervisorArch } from "../supervisor/supervisor";
-import { HassioAddonInfo } from "./addon";
+import { HassioAddonInfo, HassioAddonRepository } from "./addon";
 import { hassioApiResultExtractor, HassioResponse } from "./common";
 
 export type HassioHomeAssistantInfo = {
@@ -23,7 +23,7 @@ export type HassioHomeAssistantInfo = {
 
 export type HassioSupervisorInfo = {
   addons: HassioAddonInfo[];
-  addons_repositories: string[];
+  addons_repositories: HassioAddonRepository[];
   arch: SupervisorArch;
   channel: string;
   debug: boolean;
@@ -179,10 +179,7 @@ export const fetchHassioInfo = async (
 };
 
 export const fetchHassioLogs = async (hass: HomeAssistant, provider: string) =>
-  hass.callApi<string>(
-    "GET",
-    `hassio/${provider.includes("_") ? `addons/${provider}` : provider}/logs`
-  );
+  hass.callApi<string>("GET", `hassio/${provider}/logs`);
 
 export const setSupervisorOption = async (
   hass: HomeAssistant,

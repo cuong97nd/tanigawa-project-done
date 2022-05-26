@@ -2,10 +2,7 @@ import "@material/mwc-button";
 import { mdiImagePlus, mdiPencil } from "@mdi/js";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
-import {
-  HassEntity,
-  UnsubscribeFunc,
-} from "home-assistant-js-websocket/dist/types";
+import { HassEntity } from "home-assistant-js-websocket/dist/types";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { ifDefined } from "lit/directives/if-defined";
@@ -19,11 +16,9 @@ import { afterNextRender } from "../../../common/util/render-status";
 import "../../../components/ha-card";
 import "../../../components/ha-icon-button";
 import "../../../components/ha-icon-next";
-import "../../logbook/ha-logbook";
 import {
   AreaRegistryEntry,
   deleteAreaRegistryEntry,
-  subscribeAreaRegistry,
   updateAreaRegistryEntry,
 } from "../../../data/area_registry";
 import { AutomationEntity } from "../../../data/automation";
@@ -31,13 +26,11 @@ import {
   computeDeviceName,
   DeviceRegistryEntry,
   sortDeviceRegistryByName,
-  subscribeDeviceRegistry,
 } from "../../../data/device_registry";
 import {
   computeEntityRegistryName,
   EntityRegistryEntry,
   sortEntityRegistryByName,
-  subscribeEntityRegistry,
 } from "../../../data/entity_registry";
 import { SceneEntity } from "../../../data/scene";
 import { ScriptEntity } from "../../../data/script";
@@ -51,7 +44,6 @@ import {
   loadAreaRegistryDetailDialog,
   showAreaRegistryDetailDialog,
 } from "./show-dialog-area-registry-detail";
-import { SubscribeMixin } from "../../../mixins/subscribe-mixin";
 
 declare type NameAndEntity<EntityType extends HassEntity> = {
   name: string;
@@ -59,10 +51,16 @@ declare type NameAndEntity<EntityType extends HassEntity> = {
 };
 
 @customElement("ha-config-area-page")
-class HaConfigAreaPage extends SubscribeMixin(LitElement) {
+class HaConfigAreaPage extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property() public areaId!: string;
+
+  @property() public areas!: AreaRegistryEntry[];
+
+  @property() public devices!: DeviceRegistryEntry[];
+
+  @property() public entities!: EntityRegistryEntry[];
 
   @property({ type: Boolean, reflect: true }) public narrow!: boolean;
 
@@ -72,15 +70,7 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
 
   @property() public route!: Route;
 
-  @state() public _areas!: AreaRegistryEntry[];
-
-  @state() public _devices!: DeviceRegistryEntry[];
-
-  @state() public _entities!: EntityRegistryEntry[];
-
   @state() private _related?: RelatedResult;
-
-  private _logbookTime = { recent: 86400 };
 
   private _area = memoizeOne(
     (
@@ -96,7 +86,7 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
       registryDevices: DeviceRegistryEntry[],
       registryEntities: EntityRegistryEntry[]
     ) => {
-      const devices = new Map<string, DeviceRegistryEntry>();
+      const devices = new Map();
 
       for (const device of registryDevices) {
         if (device.area_id === areaId) {
@@ -112,7 +102,7 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
           if (entity.area_id === areaId) {
             entities.push(entity);
           }
-        } else if (entity.device_id && devices.has(entity.device_id)) {
+        } else if (devices.has(entity.device_id)) {
           indirectEntities.push(entity);
         }
       }
@@ -123,20 +113,6 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
         indirectEntities,
       };
     }
-  );
-
-  private _allDeviceIds = memoizeOne((devices: DeviceRegistryEntry[]) =>
-    devices.map((device) => device.id)
-  );
-
-  private _allEntities = memoizeOne(
-    (memberships: {
-      entities: EntityRegistryEntry[];
-      indirectEntities: EntityRegistryEntry[];
-    }) =>
-      memberships.entities
-        .map((entry) => entry.entity_id)
-        .concat(memberships.indirectEntities.map((entry) => entry.entity_id))
   );
 
   protected firstUpdated(changedProps) {
@@ -151,26 +127,8 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
     }
   }
 
-  protected hassSubscribe(): (UnsubscribeFunc | Promise<UnsubscribeFunc>)[] {
-    return [
-      subscribeAreaRegistry(this.hass.connection, (areas) => {
-        this._areas = areas;
-      }),
-      subscribeDeviceRegistry(this.hass.connection, (entries) => {
-        this._devices = entries;
-      }),
-      subscribeEntityRegistry(this.hass.connection, (entries) => {
-        this._entities = entries;
-      }),
-    ];
-  }
-
   protected render(): TemplateResult {
-    if (!this._areas || !this._devices || !this._entities) {
-      return html``;
-    }
-
-    const area = this._area(this.areaId, this._areas);
+    const area = this._area(this.areaId, this.areas);
 
     if (!area) {
       return html`
@@ -181,12 +139,11 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
       `;
     }
 
-    const memberships = this._memberships(
+    const { devices, entities } = this._memberships(
       this.areaId,
-      this._devices,
-      this._entities
+      this.devices,
+      this.entities
     );
-    const { devices, entities } = memberships;
 
     // Pre-compute the entity and device names, so we can sort by them
     if (devices) {
@@ -245,7 +202,7 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
       <hass-tabs-subpage
         .hass=${this.hass}
         .narrow=${this.narrow}
-        .tabs=${configSections.areas}
+        .tabs=${configSections.devices}
         .route=${this.route}
       >
         ${this.narrow
@@ -302,7 +259,6 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
                   <ha-svg-icon .path=${mdiImagePlus} slot="icon"></ha-svg-icon>
                 </mwc-button>`}
             <ha-card
-              outlined
               .header=${this.hass.localize("ui.panel.config.devices.caption")}
               >${devices.length
                 ? devices.map(
@@ -325,7 +281,6 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
                   `}
             </ha-card>
             <ha-card
-              outlined
               .header=${this.hass.localize(
                 "ui.panel.config.areas.editor.linked_entities_caption"
               )}
@@ -359,7 +314,6 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
             ${isComponentLoaded(this.hass, "automation")
               ? html`
                   <ha-card
-                    outlined
                     .header=${this.hass.localize(
                       "ui.panel.config.devices.automation.automations_heading"
                     )}
@@ -402,10 +356,11 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
                   </ha-card>
                 `
               : ""}
+          </div>
+          <div class="column">
             ${isComponentLoaded(this.hass, "scene")
               ? html`
                   <ha-card
-                    outlined
                     .header=${this.hass.localize(
                       "ui.panel.config.devices.scene.scenes_heading"
                     )}
@@ -445,7 +400,6 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
             ${isComponentLoaded(this.hass, "script")
               ? html`
                   <ha-card
-                    outlined
                     .header=${this.hass.localize(
                       "ui.panel.config.devices.script.scripts_heading"
                     )}
@@ -479,26 +433,6 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
                           >
                         `
                       : ""}
-                  </ha-card>
-                `
-              : ""}
-          </div>
-          <div class="column">
-            ${isComponentLoaded(this.hass, "logbook")
-              ? html`
-                  <ha-card
-                    outlined
-                    .header=${this.hass.localize("panel.logbook")}
-                  >
-                    <ha-logbook
-                      .hass=${this.hass}
-                      .time=${this._logbookTime}
-                      .entityIds=${this._allEntities(memberships)}
-                      .deviceIds=${this._allDeviceIds(memberships.devices)}
-                      virtualize
-                      narrow
-                      no-icon
-                    ></ha-logbook>
                   </ha-card>
                 `
               : ""}
@@ -759,13 +693,6 @@ class HaConfigAreaPage extends SubscribeMixin(LitElement) {
           background-color: var(--card-background-color);
           opacity: 0.5;
           border-radius: 50%;
-        }
-        ha-logbook {
-          height: 800px;
-        }
-        :host([narrow]) ha-logbook {
-          height: 400px;
-          overflow: auto;
         }
       `,
     ];

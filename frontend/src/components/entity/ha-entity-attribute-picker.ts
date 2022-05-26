@@ -19,16 +19,12 @@ class HaEntityAttributePicker extends LitElement {
 
   @property({ type: Boolean }) public disabled = false;
 
-  @property({ type: Boolean }) public required = false;
-
   @property({ type: Boolean, attribute: "allow-custom-value" })
   public allowCustomValue;
 
   @property() public label?: string;
 
   @property() public value?: string;
-
-  @property() public helper?: string;
 
   @property({ type: Boolean }) private _opened = false;
 
@@ -65,8 +61,6 @@ class HaEntityAttributePicker extends LitElement {
           "ui.components.entity.entity-attribute-picker.attribute"
         )}
         .disabled=${this.disabled || !this.entityId}
-        .required=${this.required}
-        .helper=${this.helper}
         .allowCustomValue=${this.allowCustomValue}
         item-value-path="value"
         item-label-path="label"

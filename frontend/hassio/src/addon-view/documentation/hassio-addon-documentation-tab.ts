@@ -38,7 +38,7 @@ class HassioAddonDocumentationDashboard extends LitElement {
     }
     return html`
       <div class="content">
-        <ha-card outlined>
+        <ha-card>
           ${this._error
             ? html`<ha-alert alert-type="error">${this._error}</ha-alert>`
             : ""}

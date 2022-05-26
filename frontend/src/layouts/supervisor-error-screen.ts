@@ -101,8 +101,7 @@ class SupervisorErrorScreen extends LitElement {
       this.parentElement,
       this.hass.themes,
       themeName,
-      themeSettings,
-      true
+      themeSettings
     );
   }
 

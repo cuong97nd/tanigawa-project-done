@@ -43,8 +43,6 @@ class HuiEnergyDistrubutionCard
 
   @state() private _data?: EnergyData;
 
-  protected hassSubscribeRequiredHostProps = ["_config"];
-
   public setConfig(config: EnergyDistributionCardConfig): void {
     this._config = config;
   }

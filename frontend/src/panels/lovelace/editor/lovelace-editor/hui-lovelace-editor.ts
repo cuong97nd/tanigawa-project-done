@@ -1,9 +1,10 @@
-import "../../../../components/ha-textfield";
-import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
+import "@polymer/paper-input/paper-input";
+import { CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import { fireEvent } from "../../../../common/dom/fire_event";
 import { LovelaceConfig } from "../../../../data/lovelace";
 import { HomeAssistant } from "../../../../types";
+import { configElementStyle } from "../config-elements/config-elements-style";
 import { EditorTarget } from "../types";
 
 declare global {
@@ -29,14 +30,16 @@ export class HuiLovelaceEditor extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <ha-textfield
-        .label=${this.hass.localize(
-          "ui.panel.lovelace.editor.edit_lovelace.title"
-        )}
-        .value=${this._title}
-        .configValue=${"title"}
-        @change=${this._valueChanged}
-      ></ha-textfield>
+      <div class="card-config">
+        <paper-input
+          .label=${this.hass.localize(
+            "ui.panel.lovelace.editor.edit_lovelace.title"
+          )}
+          .value=${this._title}
+          .configValue=${"title"}
+          @value-changed=${this._valueChanged}
+        ></paper-input>
+      </div>
     `;
   }
 
@@ -63,11 +66,9 @@ export class HuiLovelaceEditor extends LitElement {
     fireEvent(this, "lovelace-config-changed", { config: newConfig });
   }
 
-  static styles: CSSResultGroup = css`
-    ha-textfield {
-      display: block;
-    }
-  `;
+  static get styles(): CSSResultGroup {
+    return configElementStyle;
+  }
 }
 
 declare global {

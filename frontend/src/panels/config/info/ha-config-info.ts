@@ -1,16 +1,13 @@
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
-import { property, state } from "lit/decorators";
-import { isComponentLoaded } from "../../../common/config/is_component_loaded";
+import { property } from "lit/decorators";
+import "../../../layouts/hass-tabs-subpage";
 import "../../../components/ha-logo-svg";
-import {
-  fetchHassioHassOsInfo,
-  HassioHassOSInfo,
-} from "../../../data/hassio/host";
-import { fetchHassioInfo, HassioInfo } from "../../../data/hassio/supervisor";
-import "../../../layouts/hass-subpage";
 import { haStyle } from "../../../resources/styles";
 import { HomeAssistant, Route } from "../../../types";
 import { documentationUrl } from "../../../util/documentation-url";
+import { configSections } from "../ha-panel-config";
+import "./integrations-card";
+import "./system-health-card";
 
 const JS_TYPE = __BUILD__;
 const JS_VERSION = __VERSION__;
@@ -18,17 +15,13 @@ const JS_VERSION = __VERSION__;
 class HaConfigInfo extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @property({ type: Boolean }) public narrow!: boolean;
+  @property() public narrow!: boolean;
 
-  @property({ type: Boolean }) public isWide!: boolean;
+  @property() public isWide!: boolean;
 
-  @property({ type: Boolean }) public showAdvanced!: boolean;
+  @property() public showAdvanced!: boolean;
 
-  @property({ attribute: false }) public route!: Route;
-
-  @state() private _osInfo?: HassioHassOSInfo;
-
-  @state() private _hassioInfo?: HassioInfo;
+  @property() public route!: Route;
 
   protected render(): TemplateResult {
     const hass = this.hass;
@@ -36,11 +29,12 @@ class HaConfigInfo extends LitElement {
       (window as any).CUSTOM_UI_LIST || [];
 
     return html`
-      <hass-subpage
+      <hass-tabs-subpage
         .hass=${this.hass}
         .narrow=${this.narrow}
         back-path="/config"
-        .header=${this.hass.localize("ui.panel.config.info.caption")}
+        .route=${this.route}
+        .tabs=${configSections.general}
       >
         <div class="about">
           <a
@@ -56,17 +50,7 @@ class HaConfigInfo extends LitElement {
             </ha-logo-svg>
           </a>
           <br />
-          <h3>Home Assistant Core ${hass.connection.haVersion}</h3>
-          ${this._hassioInfo
-            ? html`
-                <h3>
-                  Home Assistant Supervisor ${this._hassioInfo.supervisor}
-                </h3>
-              `
-            : ""}
-          ${this._osInfo?.version
-            ? html`<h3>Home Assistant OS ${this._osInfo.version}</h3>`
-            : ""}
+          <h2>Home Assistant ${hass.connection.haVersion}</h2>
           <p>
             ${this.hass.localize(
               "ui.panel.config.info.path_configuration",
@@ -146,7 +130,14 @@ class HaConfigInfo extends LitElement {
               : ""}
           </p>
         </div>
-      </hass-subpage>
+        <div>
+          <system-health-card .hass=${this.hass}></system-health-card>
+          <integrations-card
+            .hass=${this.hass}
+            .narrow=${this.narrow}
+          ></integrations-card>
+        </div>
+      </hass-tabs-subpage>
     `;
   }
 
@@ -160,20 +151,6 @@ class HaConfigInfo extends LitElement {
         this.requestUpdate();
       }
     }, 1000);
-
-    if (isComponentLoaded(this.hass, "hassio")) {
-      this._loadSupervisorInfo();
-    }
-  }
-
-  private async _loadSupervisorInfo(): Promise<void> {
-    const [osInfo, hassioInfo] = await Promise.all([
-      fetchHassioHassOsInfo(this.hass),
-      fetchHassioInfo(this.hass),
-    ]);
-
-    this._hassioInfo = hassioInfo;
-    this._osInfo = osInfo;
   }
 
   static get styles(): CSSResultGroup {
@@ -202,14 +179,18 @@ class HaConfigInfo extends LitElement {
         .about a {
           color: var(--primary-color);
         }
+
+        system-health-card,
+        integrations-card {
+          display: block;
+          max-width: 600px;
+          margin: 0 auto;
+          padding-bottom: 16px;
+        }
         ha-logo-svg {
           padding: 12px;
           height: 180px;
           width: 180px;
-        }
-
-        h4 {
-          font-weight: 400;
         }
       `,
     ];

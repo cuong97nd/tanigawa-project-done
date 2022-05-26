@@ -17,12 +17,7 @@ import {
   HassioAddonDetails,
 } from "../../../src/data/hassio/addon";
 import { extractApiErrorMessage } from "../../../src/data/hassio/common";
-import {
-  fetchHassioSupervisorInfo,
-  setSupervisorOption,
-} from "../../../src/data/hassio/supervisor";
 import { Supervisor } from "../../../src/data/supervisor/supervisor";
-import { showConfirmationDialog } from "../../../src/dialogs/generic/show-dialog-box";
 import "../../../src/layouts/hass-error-screen";
 import "../../../src/layouts/hass-loading-screen";
 import "../../../src/layouts/hass-tabs-subpage";
@@ -171,44 +166,6 @@ class HassioAddonDashboard extends LitElement {
   protected async firstUpdated(): Promise<void> {
     if (this.route.path === "") {
       const requestedAddon = extractSearchParam("addon");
-      const requestedAddonRepository = extractSearchParam("repository_url");
-      if (requestedAddonRepository) {
-        const supervisorInfo = await fetchHassioSupervisorInfo(this.hass);
-        if (
-          !supervisorInfo.addons_repositories.find(
-            (repo) => repo === requestedAddonRepository
-          )
-        ) {
-          if (
-            !(await showConfirmationDialog(this, {
-              title: this.supervisor.localize("my.add_addon_repository_title"),
-              text: this.supervisor.localize(
-                "my.add_addon_repository_description",
-                { addon: requestedAddon, repository: requestedAddonRepository }
-              ),
-              confirmText: this.supervisor.localize("common.add"),
-              dismissText: this.supervisor.localize("common.cancel"),
-            }))
-          ) {
-            this._error = this.supervisor.localize(
-              "my.error_repository_not_found"
-            );
-            return;
-          }
-
-          try {
-            await setSupervisorOption(this.hass, {
-              addons_repositories: [
-                ...supervisorInfo.addons_repositories,
-                requestedAddonRepository,
-              ],
-            });
-          } catch (err: any) {
-            this._error = extractApiErrorMessage(err);
-          }
-        }
-      }
-
       if (requestedAddon) {
         const addonsInfo = await fetchHassioAddonsInfo(this.hass);
         const validAddon = addonsInfo.addons.some(

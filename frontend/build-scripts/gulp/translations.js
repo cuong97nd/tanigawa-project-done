@@ -7,7 +7,7 @@ const source = require("vinyl-source-stream");
 const vinylBuffer = require("vinyl-buffer");
 const gulp = require("gulp");
 const fs = require("fs");
-const flatmap = require("gulp-flatmap");
+const foreach = require("gulp-foreach");
 const merge = require("gulp-merge-json");
 const rename = require("gulp-rename");
 const transform = require("gulp-json-transform");
@@ -183,7 +183,7 @@ gulp.task("build-merged-translations", () =>
     })
     .pipe(transform((data, file) => lokaliseTransform(data, data, file)))
     .pipe(
-      flatmap((stream, file) => {
+      foreach((stream, file) => {
         // For each language generate a merged json file. It begins with the master
         // translation as a failsafe for untranslated strings, and merges all parent
         // tags into one file for each specific subtag

@@ -64,7 +64,6 @@ export class DialogHassioBackupUpload
               .path=${mdiClose}
               slot="actionItems"
               dialogAction="cancel"
-              dialogInitialFocus
             ></ha-icon-button>
           </ha-header-bar>
         </div>

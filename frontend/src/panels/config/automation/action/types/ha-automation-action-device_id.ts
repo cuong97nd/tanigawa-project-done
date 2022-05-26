@@ -69,7 +69,6 @@ export class HaDeviceAction extends LitElement {
       ${this._capabilities?.extra_fields
         ? html`
             <ha-form
-              .hass=${this.hass}
               .data=${this._extraFieldsData(this.action, this._capabilities)}
               .schema=${this._capabilities.extra_fields}
               .computeLabel=${this._extraFieldsComputeLabelCallback(
@@ -143,12 +142,9 @@ export class HaDeviceAction extends LitElement {
   }
 
   static styles = css`
-    ha-device-picker {
-      display: block;
-      margin-bottom: 16px;
-    }
     ha-device-action-picker {
       display: block;
+      margin-top: 8px;
     }
   `;
 }

@@ -1,3 +1,4 @@
+import "@polymer/paper-input/paper-input";
 import { CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { assert } from "superstruct";
@@ -5,7 +6,6 @@ import { fireEvent, HASSDomEvent } from "../../../../common/dom/fire_event";
 import "../../../../components/entity/ha-entity-picker";
 import "../../../../components/ha-formfield";
 import "../../../../components/ha-switch";
-import "../../../../components/ha-textfield";
 import type { HomeAssistant } from "../../../../types";
 import { graphHeaderFooterConfigStruct } from "../../header-footer/structs";
 import { GraphHeaderFooterConfig } from "../../header-footer/types";
@@ -50,14 +50,15 @@ export class HuiGraphFooterEditor
       <div class="card-config">
         <ha-entity-picker
           allow-custom-entity
-          .label=${this.hass.localize(
+          .label="${this.hass.localize(
             "ui.panel.lovelace.editor.card.generic.entity"
-          )}
+          )} (${this.hass.localize(
+            "ui.panel.lovelace.editor.card.config.required"
+          )})"
           .hass=${this.hass}
           .value=${this._entity}
           .configValue=${"entity"}
           .includeDomains=${includeDomains}
-          .required=${true}
           @change=${this._valueChanged}
         ></ha-entity-picker>
         <div class="side-by-side">
@@ -72,7 +73,7 @@ export class HuiGraphFooterEditor
               @change=${this._change}
             ></ha-switch>
           </ha-formfield>
-          <ha-textfield
+          <paper-input
             type="number"
             .label="${this.hass.localize(
               "ui.panel.lovelace.editor.card.generic.hours_to_show"
@@ -82,8 +83,8 @@ export class HuiGraphFooterEditor
             .value=${this._hours_to_show}
             min="1"
             .configValue=${"hours_to_show"}
-            @input=${this._valueChanged}
-          ></ha-textfield>
+            @value-changed=${this._valueChanged}
+          ></paper-input>
         </div>
       </div>
     `;

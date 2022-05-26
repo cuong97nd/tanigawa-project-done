@@ -1,4 +1,3 @@
-import "@material/mwc-list/mwc-list-item";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { property } from "lit/decorators";
 import memoizeOne from "memoize-one";
@@ -6,8 +5,9 @@ import { fireEvent } from "../../common/dom/fire_event";
 import { stringCompare } from "../../common/string/compare";
 import { fetchUsers, User } from "../../data/user";
 import { HomeAssistant } from "../../types";
-import "../ha-select";
 import "./ha-user-badge";
+import "@material/mwc-select/mwc-select";
+import "@material/mwc-list/mwc-list-item";
 
 class HaUserPicker extends LitElement {
   public hass?: HomeAssistant;
@@ -34,7 +34,7 @@ class HaUserPicker extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <ha-select
+      <mwc-select
         .label=${this.label}
         .disabled=${this.disabled}
         .value=${this.value}
@@ -58,7 +58,7 @@ class HaUserPicker extends LitElement {
             </mwc-list-item>
           `
         )}
-      </ha-select>
+      </mwc-select>
     `;
   }
 

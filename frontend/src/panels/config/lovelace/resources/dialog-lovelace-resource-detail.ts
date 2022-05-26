@@ -1,20 +1,21 @@
 import "@material/mwc-button/mwc-button";
-import { CSSResultGroup, html, LitElement, TemplateResult } from "lit";
+import "@polymer/paper-input/paper-input";
+import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import memoizeOne from "memoize-one";
-import { fireEvent } from "../../../../common/dom/fire_event";
 import { createCloseHeading } from "../../../../components/ha-dialog";
-import "../../../../components/ha-form/ha-form";
-import { HaFormSchema } from "../../../../components/ha-form/types";
-import { LovelaceResourcesMutableParams } from "../../../../data/lovelace";
+import {
+  LovelaceResource,
+  LovelaceResourcesMutableParams,
+} from "../../../../data/lovelace";
+import { PolymerChangedEvent } from "../../../../polymer-types";
 import { haStyleDialog } from "../../../../resources/styles";
 import { HomeAssistant } from "../../../../types";
 import { LovelaceResourceDetailsDialogParams } from "./show-dialog-lovelace-resource-detail";
+import "@material/mwc-list/mwc-list-item";
+import "@material/mwc-select/mwc-select";
+import { stopPropagation } from "../../../../common/dom/stop_propagation";
 
-const detectResourceType = (url?: string) => {
-  if (!url) {
-    return undefined;
-  }
+const detectResourceType = (url: string) => {
   const ext = url.split(".").pop() || "";
 
   if (ext === "css") {
@@ -34,41 +35,38 @@ export class DialogLovelaceResourceDetail extends LitElement {
 
   @state() private _params?: LovelaceResourceDetailsDialogParams;
 
-  @state() private _data?: Partial<LovelaceResourcesMutableParams>;
+  @state() private _url!: LovelaceResource["url"];
 
-  @state() private _error?: Record<string, string>;
+  @state() private _type?: LovelaceResource["type"];
+
+  @state() private _error?: string;
 
   @state() private _submitting = false;
 
-  public showDialog(params: LovelaceResourceDetailsDialogParams): void {
+  public async showDialog(
+    params: LovelaceResourceDetailsDialogParams
+  ): Promise<void> {
     this._params = params;
     this._error = undefined;
     if (this._params.resource) {
-      this._data = {
-        url: this._params.resource.url,
-        res_type: this._params.resource.type,
-      };
+      this._url = this._params.resource.url || "";
+      this._type = this._params.resource.type || undefined;
     } else {
-      this._data = {
-        url: "",
-      };
+      this._url = "";
+      this._type = undefined;
     }
-  }
-
-  public closeDialog(): void {
-    this._params = undefined;
-    fireEvent(this, "dialog-closed", { dialog: this.localName });
+    await this.updateComplete;
   }
 
   protected render(): TemplateResult {
     if (!this._params) {
       return html``;
     }
-    const urlInvalid = !this._data?.url || this._data.url.trim() === "";
+    const urlInvalid = this._url.trim() === "";
     return html`
       <ha-dialog
         open
-        @closed=${this.closeDialog}
+        @closed=${this._close}
         scrimClickAction
         escapeKeyAction
         .heading=${createCloseHeading(
@@ -81,25 +79,68 @@ export class DialogLovelaceResourceDetail extends LitElement {
         )}
       >
         <div>
-          <ha-alert
-            alert-type="warning"
-            .title=${this.hass!.localize(
-              "ui.panel.config.lovelace.resources.detail.warning_header"
-            )}
-          >
+          ${this._error ? html` <div class="error">${this._error}</div> ` : ""}
+          <div class="form">
+            <h3 class="warning">
+              ${this.hass!.localize(
+                "ui.panel.config.lovelace.resources.detail.warning_header"
+              )}
+            </h3>
             ${this.hass!.localize(
               "ui.panel.config.lovelace.resources.detail.warning_text"
             )}
-          </ha-alert>
-
-          <ha-form
-            .schema=${this._schema(this._data)}
-            .data=${this._data}
-            .hass=${this.hass}
-            .error=${this._error}
-            .computeLabel=${this._computeLabel}
-            @value-changed=${this._valueChanged}
-          ></ha-form>
+            <paper-input
+              .value=${this._url}
+              @value-changed=${this._urlChanged}
+              .label=${this.hass!.localize(
+                "ui.panel.config.lovelace.resources.detail.url"
+              )}
+              .errorMessage=${this.hass!.localize(
+                "ui.panel.config.lovelace.resources.detail.url_error_msg"
+              )}
+              .invalid=${urlInvalid}
+              dialogInitialFocus
+            ></paper-input>
+            <br />
+            <mwc-select
+              .label=${this.hass!.localize(
+                "ui.panel.config.lovelace.resources.detail.type"
+              )}
+              .value=${this._type}
+              @selected=${this._typeChanged}
+              @closed=${stopPropagation}
+              .invalid=${!this._type}
+            >
+              <mwc-list-item value="module">
+                ${this.hass!.localize(
+                  "ui.panel.config.lovelace.resources.types.module"
+                )}
+              </mwc-list-item>
+              ${this._type === "js"
+                ? html`
+                    <mwc-list-item value="js">
+                      ${this.hass!.localize(
+                        "ui.panel.config.lovelace.resources.types.js"
+                      )}
+                    </mwc-list-item>
+                  `
+                : ""}
+              <mwc-list-item value="css">
+                ${this.hass!.localize(
+                  "ui.panel.config.lovelace.resources.types.css"
+                )}
+              </mwc-list-item>
+              ${this._type === "html"
+                ? html`
+                    <mwc-list-item value="html">
+                      ${this.hass!.localize(
+                        "ui.panel.config.lovelace.resources.types.html"
+                      )}
+                    </mwc-list-item>
+                  `
+                : ""}
+            </mwc-select>
+          </div>
         </div>
         ${this._params.resource
           ? html`
@@ -118,7 +159,7 @@ export class DialogLovelaceResourceDetail extends LitElement {
         <mwc-button
           slot="primaryAction"
           @click=${this._updateResource}
-          .disabled=${urlInvalid || !this._data?.res_type || this._submitting}
+          .disabled=${urlInvalid || !this._type || this._submitting}
         >
           ${this._params.resource
             ? this.hass!.localize(
@@ -132,86 +173,37 @@ export class DialogLovelaceResourceDetail extends LitElement {
     `;
   }
 
-  private _schema = memoizeOne((data) => [
-    {
-      name: "url",
-      required: true,
-      selector: {
-        text: {},
-      },
-    },
-    {
-      name: "res_type",
-      required: true,
-      selector: {
-        select: {
-          options: [
-            {
-              value: "module",
-              label: this.hass!.localize(
-                "ui.panel.config.lovelace.resources.types.module"
-              ),
-            },
-            {
-              value: "css",
-              label: this.hass!.localize(
-                "ui.panel.config.lovelace.resources.types.css"
-              ),
-            },
-            data.type === "js" && {
-              value: "js",
-              label: this.hass!.localize(
-                "ui.panel.config.lovelace.resources.types.js"
-              ),
-            },
-            data.type === "html" && {
-              value: "html",
-              label: this.hass!.localize(
-                "ui.panel.config.lovelace.resources.types.html"
-              ),
-            },
-          ].filter(Boolean),
-        },
-      },
-    },
-  ]);
-
-  private _computeLabel = (entry: HaFormSchema): string =>
-    this.hass.localize(
-      `ui.panel.config.lovelace.resources.detail.${entry.name}`
-    );
-
-  private _valueChanged(ev: CustomEvent) {
-    this._data = ev.detail.value;
-    if (!this._data!.res_type) {
-      const type = detectResourceType(this._data!.url);
-      if (!type) {
-        return;
-      }
-      this._data = {
-        ...this._data,
-        res_type: type,
-      };
+  private _urlChanged(ev: PolymerChangedEvent<string>) {
+    this._error = undefined;
+    this._url = ev.detail.value;
+    if (!this._type) {
+      this._type = detectResourceType(this._url);
     }
   }
 
+  private _typeChanged(ev) {
+    this._type = ev.target.value;
+  }
+
   private async _updateResource() {
-    if (!this._data?.res_type) {
+    if (!this._type) {
       return;
     }
 
     this._submitting = true;
     try {
+      const values: LovelaceResourcesMutableParams = {
+        url: this._url.trim(),
+        res_type: this._type,
+      };
       if (this._params!.resource) {
-        await this._params!.updateResource(this._data!);
+        await this._params!.updateResource(values);
       } else {
-        await this._params!.createResource(
-          this._data! as LovelaceResourcesMutableParams
-        );
+        await this._params!.createResource(values);
       }
       this._params = undefined;
     } catch (err: any) {
-      this._error = { base: err?.message || "Unknown error" };
+      this._error = err?.message || "Unknown error";
     } finally {
       this._submitting = false;
     }
@@ -221,15 +213,26 @@ export class DialogLovelaceResourceDetail extends LitElement {
     this._submitting = true;
     try {
       if (await this._params!.removeResource()) {
-        this.closeDialog();
+        this._close();
       }
     } finally {
       this._submitting = false;
     }
   }
 
+  private _close(): void {
+    this._params = undefined;
+  }
+
   static get styles(): CSSResultGroup {
-    return haStyleDialog;
+    return [
+      haStyleDialog,
+      css`
+        .warning {
+          color: var(--error-color);
+        }
+      `,
+    ];
   }
 }
 

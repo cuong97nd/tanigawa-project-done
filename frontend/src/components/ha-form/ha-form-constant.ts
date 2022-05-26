@@ -9,9 +9,7 @@ export class HaFormConstant extends LitElement implements HaFormElement {
   @property() public label!: string;
 
   protected render(): TemplateResult {
-    return html`<span class="label">${this.label}</span>${this.schema.value
-        ? `: ${this.schema.value}`
-        : ""}`;
+    return html`<span class="label">${this.label}</span>: ${this.schema.value}`;
   }
 
   static get styles(): CSSResultGroup {

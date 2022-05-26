@@ -1,5 +1,4 @@
 import { Connection, createCollection } from "home-assistant-js-websocket";
-import { Store } from "home-assistant-js-websocket/dist/store";
 import { computeStateName } from "../common/entity/compute_state_name";
 import { caseInsensitiveStringCompare } from "../common/string/compare";
 import { debounce } from "../common/util/debounce";
@@ -78,26 +77,12 @@ export const updateDeviceRegistryEntry = (
     ...updates,
   });
 
-export const removeConfigEntryFromDevice = (
-  hass: HomeAssistant,
-  deviceId: string,
-  configEntryId: string
-) =>
-  hass.callWS<DeviceRegistryEntry>({
-    type: "config/device_registry/remove_config_entry",
-    device_id: deviceId,
-    config_entry_id: configEntryId,
-  });
-
-export const fetchDeviceRegistry = (conn: Connection) =>
-  conn.sendMessagePromise<DeviceRegistryEntry[]>({
+export const fetchDeviceRegistry = (conn) =>
+  conn.sendMessagePromise({
     type: "config/device_registry/list",
   });
 
-const subscribeDeviceRegistryUpdates = (
-  conn: Connection,
-  store: Store<DeviceRegistryEntry[]>
-) =>
+const subscribeDeviceRegistryUpdates = (conn, store) =>
   conn.subscribeEvents(
     debounce(
       () =>

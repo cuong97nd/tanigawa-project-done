@@ -1,10 +1,11 @@
-import { addHours } from "date-fns/esm";
+import { addHours } from "date-fns";
 import "@material/mwc-button";
 import {
   mdiClipboardTextMultipleOutline,
   mdiInformationOutline,
   mdiRefresh,
 } from "@mdi/js";
+import "@polymer/paper-input/paper-input";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
@@ -18,8 +19,6 @@ import "../../../components/ha-code-editor";
 import "../../../components/ha-icon-button";
 import "../../../components/ha-svg-icon";
 import "../../../components/ha-checkbox";
-import "../../../components/ha-tip";
-import "../../../components/search-input";
 import "../../../components/ha-expansion-panel";
 import { showAlertDialog } from "../../../dialogs/generic/show-dialog-box";
 import { EventsMixin } from "../../../mixins/events-mixin";
@@ -41,14 +40,6 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
           -moz-user-select: initial;
           display: block;
           padding: 16px;
-        }
-
-        ha-textfield {
-          display: block;
-        }
-
-        .state-input {
-          margin-top: 16px;
         }
 
         ha-expansion-panel {
@@ -81,19 +72,6 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
           font-size: var(
             --paper-input-container-shared-input-style_-_font-size
           );
-        }
-
-        .filters th {
-          padding: 0;
-        }
-
-        .filters search-input {
-          display: block;
-          --mdc-text-field-fill-color: transparent;
-        }
-        ha-tip {
-          display: flex;
-          padding: 8px 0;
         }
 
         th.attributes {
@@ -186,18 +164,16 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
               on-change="entityIdChanged"
               allow-custom-entity
             ></ha-entity-picker>
-            <ha-tip>[[localize('ui.tips.key_e_hint')]]</ha-tip>
-            <ha-textfield
+            <paper-input
               label="[[localize('ui.panel.developer-tools.tabs.states.state')]]"
               required
               autocapitalize="none"
               autocomplete="off"
               autocorrect="off"
               spellcheck="false"
-              value="[[_state]]"
-              on-change="stateChanged"
+              value="{{_state}}"
               class="state-input"
-            ></ha-textfield>
+            ></paper-input>
             <p>
               [[localize('ui.panel.developer-tools.tabs.states.state_attributes')]]
             </p>
@@ -258,29 +234,27 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
               ></ha-checkbox>
             </th>
           </tr>
-          <tr class="filters">
+          <tr>
             <th>
-              <search-input
+              <paper-input
                 label="[[localize('ui.panel.developer-tools.tabs.states.filter_entities')]]"
-                value="[[_entityFilter]]"
-                on-value-changed="_entityFilterChanged"
-              ></search-input>
+                type="search"
+                value="{{_entityFilter}}"
+              ></paper-input>
             </th>
             <th>
-              <search-input
+              <paper-input
                 label="[[localize('ui.panel.developer-tools.tabs.states.filter_states')]]"
                 type="search"
-                value="[[_stateFilter]]"
-                on-value-changed="_stateFilterChanged"
-              ></search-input>
+                value="{{_stateFilter}}"
+              ></paper-input>
             </th>
             <th hidden$="[[!computeShowAttributes(narrow, _showAttributes)]]">
-              <search-input
+              <paper-input
                 label="[[localize('ui.panel.developer-tools.tabs.states.filter_attributes')]]"
                 type="search"
-                value="[[_attributeFilter]]"
-                on-value-changed="_attributeFilterChanged"
-              ></search-input>
+                value="{{_attributeFilter}}"
+              ></paper-input>
             </th>
           </tr>
           <tr hidden$="[[!computeShowEntitiesPlaceholder(_entities)]]">
@@ -440,22 +414,6 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
     this._state = state.state;
     this._stateAttributes = dump(state.attributes);
     this._expanded = true;
-  }
-
-  stateChanged(ev) {
-    this._state = ev.target.value;
-  }
-
-  _entityFilterChanged(ev) {
-    this._entityFilter = ev.detail.value;
-  }
-
-  _stateFilterChanged(ev) {
-    this._stateFilter = ev.detail.value;
-  }
-
-  _attributeFilterChanged(ev) {
-    this._attributeFilter = ev.detail.value;
   }
 
   _getHistoryURL(entityId, inputDate) {

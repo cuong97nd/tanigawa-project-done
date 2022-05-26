@@ -76,9 +76,8 @@ const DOMAIN_TO_ELEMENT_TYPE = {
   script: "script",
   select: "select",
   sensor: "sensor",
-  siren: "toggle",
-  switch: "toggle",
   timer: "timer",
+  switch: "toggle",
   vacuum: "toggle",
   // Temporary. Once climate is rewritten,
   // water heater should get its own row.

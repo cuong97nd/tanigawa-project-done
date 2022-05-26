@@ -15,7 +15,7 @@ import {
 } from "../../src/panels/my/ha-panel-my";
 import { HomeAssistant, Route } from "../../src/types";
 
-export const REDIRECTS: Redirects = {
+const REDIRECTS: Redirects = {
   supervisor: {
     redirect: "/hassio/dashboard",
   },
@@ -41,9 +41,6 @@ export const REDIRECTS: Redirects = {
     redirect: "/hassio/addon",
     params: {
       addon: "string",
-    },
-    optional_params: {
-      repository_url: "url",
     },
   },
   supervisor_ingress: {
@@ -126,14 +123,6 @@ class HassioMyRedirect extends LitElement {
         throw Error();
       }
       resultParams[key] = params[key];
-    });
-    Object.entries(redirect.optional_params || {}).forEach(([key, type]) => {
-      if (params[key]) {
-        if (!this._checkParamType(type, params[key])) {
-          throw Error();
-        }
-        resultParams[key] = params[key];
-      }
     });
     return `?${createSearchParam(resultParams)}`;
   }

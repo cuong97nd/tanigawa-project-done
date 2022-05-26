@@ -1,5 +1,5 @@
 import "../../../../../components/ha-textarea";
-import { html, LitElement } from "lit";
+import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators";
 import type { TemplateTrigger } from "../../../../../data/automation";
 import type { HomeAssistant } from "../../../../../types";
@@ -18,27 +18,28 @@ export class HaTemplateTrigger extends LitElement {
   protected render() {
     const { value_template } = this.trigger;
     return html`
-      <p>
-        ${this.hass.localize(
+      <ha-textarea
+        name="value_template"
+        .label=${this.hass.localize(
           "ui.panel.config.automation.editor.triggers.type.template.value_template"
         )}
-        *
-      </p>
-      <ha-code-editor
-        .name=${"value_template"}
-        mode="jinja2"
-        .hass=${this.hass}
         .value=${value_template}
-        autocomplete-entities
-        @value-changed=${this._valueChanged}
+        @input=${this._valueChanged}
         dir="ltr"
-      ></ha-code-editor>
+        autogrow
+      ></ha-textarea>
     `;
   }
 
   private _valueChanged(ev: CustomEvent): void {
     handleChangeEvent(this, ev);
   }
+
+  static styles = css`
+    ha-textarea {
+      display: block;
+    }
+  `;
 }
 
 declare global {

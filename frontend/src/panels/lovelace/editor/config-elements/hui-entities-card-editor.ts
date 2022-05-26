@@ -1,3 +1,4 @@
+import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import {
@@ -26,12 +27,11 @@ import { computeRTLDirection } from "../../../../common/util/compute_rtl";
 import "../../../../components/entity/state-badge";
 import "../../../../components/ha-card";
 import "../../../../components/ha-formfield";
-import "../../../../components/ha-textfield";
 import "../../../../components/ha-icon";
 import "../../../../components/ha-switch";
 import type { HomeAssistant } from "../../../../types";
 import type { EntitiesCardConfig } from "../../cards/types";
-import "../../../../components/ha-theme-picker";
+import "../../components/hui-theme-select-editor";
 import { TIMESTAMP_RENDERING_FORMATS } from "../../components/types";
 import type { LovelaceRowConfig } from "../../entity-rows/types";
 import { headerFooterConfigStructs } from "../../header-footer/structs";
@@ -255,7 +255,7 @@ export class HuiEntitiesCardEditor
 
     return html`
       <div class="card-config">
-        <ha-textfield
+        <paper-input
           .label="${this.hass.localize(
             "ui.panel.lovelace.editor.card.generic.title"
           )} (${this.hass.localize(
@@ -263,19 +263,14 @@ export class HuiEntitiesCardEditor
           )})"
           .value=${this._title}
           .configValue=${"title"}
-          @input=${this._valueChanged}
-        ></ha-textfield>
-        <ha-theme-picker
+          @value-changed=${this._valueChanged}
+        ></paper-input>
+        <hui-theme-select-editor
           .hass=${this.hass}
           .value=${this._theme}
-          .label=${`${this.hass!.localize(
-            "ui.panel.lovelace.editor.card.generic.theme"
-          )} (${this.hass!.localize(
-            "ui.panel.lovelace.editor.card.config.optional"
-          )})`}
           .configValue=${"theme"}
           @value-changed=${this._valueChanged}
-        ></ha-theme-picker>
+        ></hui-theme-select-editor>
         <div class="side-by-side">
           <ha-formfield
             .label=${this.hass.localize(
@@ -439,11 +434,6 @@ export class HuiEntitiesCardEditor
 
         hui-header-footer-editor {
           padding-top: 4px;
-        }
-
-        ha-textfield {
-          display: block;
-          margin-bottom: 16px;
         }
       `,
     ];

@@ -135,7 +135,6 @@ export class HuiMarkdownCard extends LitElement implements LovelaceCard {
             config: this._config,
             user: this.hass.user!.name,
           },
-          strict: true,
         }
       );
     } catch (_err) {

@@ -1,3 +1,4 @@
+import { PaperInputElement } from "@polymer/paper-input/paper-input";
 import {
   css,
   CSSResultGroup,
@@ -7,13 +8,10 @@ import {
   TemplateResult,
 } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import memoizeOne from "memoize-one";
 import { fireEvent } from "../../../../src/common/dom/fire_event";
 import "../../../../src/components/buttons/ha-progress-button";
 import "../../../../src/components/ha-alert";
 import "../../../../src/components/ha-card";
-import "../../../../src/components/ha-form/ha-form";
-import type { HaFormSchema } from "../../../../src/components/ha-form/types";
 import {
   HassioAddonDetails,
   HassioAddonSetOptionParams,
@@ -26,6 +24,16 @@ import { HomeAssistant } from "../../../../src/types";
 import { suggestAddonRestart } from "../../dialogs/suggestAddonRestart";
 import { hassioStyle } from "../../resources/hassio-style";
 
+interface NetworkItem {
+  description: string;
+  container: string;
+  host: number | null;
+}
+
+interface NetworkItemInput extends PaperInputElement {
+  container: string;
+}
+
 @customElement("hassio-addon-network")
 class HassioAddonNetwork extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
@@ -34,13 +42,9 @@ class HassioAddonNetwork extends LitElement {
 
   @property({ attribute: false }) public addon!: HassioAddonDetails;
 
-  @state() private _showOptional = false;
-
-  @state() private _configHasChanged = false;
-
   @state() private _error?: string;
 
-  @state() private _config?: Record<string, any>;
+  @state() private _config?: NetworkItem[];
 
   public connectedCallback(): void {
     super.connectedCallback();
@@ -52,61 +56,59 @@ class HassioAddonNetwork extends LitElement {
       return html``;
     }
 
-    const hasHiddenOptions = Object.keys(this._config).find(
-      (entry) => this._config![entry] === null
-    );
-
     return html`
       <ha-card
-        outlined
         .header=${this.supervisor.localize(
           "addon.configuration.network.header"
         )}
       >
         <div class="card-content">
-          <p>
-            ${this.supervisor.localize(
-              "addon.configuration.network.introduction"
-            )}
-          </p>
           ${this._error
             ? html`<ha-alert alert-type="error">${this._error}</ha-alert>`
             : ""}
 
-          <ha-form
-            .data=${this._config}
-            @value-changed=${this._configChanged}
-            .computeLabel=${this._computeLabel}
-            .computeHelper=${this._computeHelper}
-            .schema=${this._createSchema(
-              this._config,
-              this._showOptional,
-              this.hass.userData?.showAdvanced || false
-            )}
-          ></ha-form>
-        </div>
-        ${hasHiddenOptions
-          ? html`<ha-formfield
-              class="show-optional"
-              .label=${this.supervisor.localize(
-                "addon.configuration.network.show_disabled"
+          <table>
+            <tbody>
+              <tr>
+                <th>
+                  ${this.supervisor.localize(
+                    "addon.configuration.network.container"
+                  )}
+                </th>
+                <th>
+                  ${this.supervisor.localize(
+                    "addon.configuration.network.host"
+                  )}
+                </th>
+                <th>${this.supervisor.localize("common.description")}</th>
+              </tr>
+              ${this._config!.map(
+                (item) => html`
+                  <tr>
+                    <td>${item.container}</td>
+                    <td>
+                      <paper-input
+                        @value-changed=${this._configChanged}
+                        placeholder=${this.supervisor.localize(
+                          "addon.configuration.network.disabled"
+                        )}
+                        .value=${item.host ? String(item.host) : ""}
+                        .container=${item.container}
+                        no-label-float
+                      ></paper-input>
+                    </td>
+                    <td>${this._computeDescription(item)}</td>
+                  </tr>
+                `
               )}
-            >
-              <ha-switch
-                @change=${this._toggleOptional}
-                .checked=${this._showOptional}
-              >
-              </ha-switch>
-            </ha-formfield>`
-          : ""}
+            </tbody>
+          </table>
+        </div>
         <div class="card-actions">
           <ha-progress-button class="warning" @click=${this._resetTapped}>
             ${this.supervisor.localize("common.reset_defaults")}
           </ha-progress-button>
-          <ha-progress-button
-            @click=${this._saveTapped}
-            .disabled=${!this._configHasChanged}
-          >
+          <ha-progress-button @click=${this._saveTapped}>
             ${this.supervisor.localize("common.save")}
           </ha-progress-button>
         </div>
@@ -121,60 +123,50 @@ class HassioAddonNetwork extends LitElement {
     }
   }
 
-  private _createSchema = memoizeOne(
-    (
-      config: Record<string, number>,
-      showOptional: boolean,
-      advanced: boolean
-    ): HaFormSchema[] =>
-      (showOptional
-        ? Object.keys(config)
-        : Object.keys(config).filter((entry) => config[entry] !== null)
-      ).map((entry) => ({
-        name: entry,
-        selector: {
-          number: {
-            mode: "box",
-            min: 0,
-            max: 65535,
-            unit_of_measurement: advanced ? entry : undefined,
-          },
-        },
-      }))
-  );
-
-  private _computeLabel = (_: HaFormSchema): string => "";
-
-  private _computeHelper = (item: HaFormSchema): string =>
-    this.addon.translations[this.hass.language]?.network?.[item.name] ||
-    this.addon.translations.en?.network?.[item.name] ||
-    this.addon.network_description?.[item.name] ||
-    item.name;
+  private _computeDescription = (item: NetworkItem): string =>
+    this.addon.translations[this.hass.language]?.network?.[item.container]
+      ?.description ||
+    this.addon.translations.en?.network?.[item.container]?.description ||
+    item.description;
 
   private _setNetworkConfig(): void {
-    this._config = this.addon.network || {};
+    const network = this.addon.network || {};
+    const description = this.addon.network_description || {};
+    const items: NetworkItem[] = Object.keys(network).map((key) => ({
+      container: key,
+      host: network[key],
+      description: description[key],
+    }));
+    this._config = items.sort((a, b) => (a.container > b.container ? 1 : -1));
   }
 
-  private async _configChanged(ev: CustomEvent): Promise<void> {
-    this._configHasChanged = true;
-    this._config! = ev.detail.value;
+  private async _configChanged(ev: Event): Promise<void> {
+    const target = ev.target as NetworkItemInput;
+    this._config!.forEach((item) => {
+      if (
+        item.container === target.container &&
+        item.host !== parseInt(String(target.value), 10)
+      ) {
+        item.host = target.value ? parseInt(String(target.value), 10) : null;
+      }
+    });
   }
 
   private async _resetTapped(ev: CustomEvent): Promise<void> {
     const button = ev.currentTarget as any;
+    button.progress = true;
+
     const data: HassioAddonSetOptionParams = {
       network: null,
     };
 
     try {
       await setHassioAddonOption(this.hass, this.addon.slug, data);
-      this._configHasChanged = false;
       const eventdata = {
         success: true,
         response: undefined,
         path: "option",
       };
-      button.actionSuccess();
       fireEvent(this, "hass-api-called", eventdata);
       if (this.addon?.state === "started") {
         await suggestAddonRestart(this, this.hass, this.supervisor, this.addon);
@@ -185,21 +177,19 @@ class HassioAddonNetwork extends LitElement {
         "error",
         extractApiErrorMessage(err)
       );
-      button.actionError();
     }
-  }
 
-  private _toggleOptional() {
-    this._showOptional = !this._showOptional;
+    button.progress = false;
   }
 
   private async _saveTapped(ev: CustomEvent): Promise<void> {
     const button = ev.currentTarget as any;
+    button.progress = true;
 
     this._error = undefined;
     const networkconfiguration = {};
-    Object.entries(this._config!).forEach(([key, value]) => {
-      networkconfiguration[key] = value ?? null;
+    this._config!.forEach((item) => {
+      networkconfiguration[item.container] = parseInt(String(item.host), 10);
     });
 
     const data: HassioAddonSetOptionParams = {
@@ -208,13 +198,11 @@ class HassioAddonNetwork extends LitElement {
 
     try {
       await setHassioAddonOption(this.hass, this.addon.slug, data);
-      this._configHasChanged = false;
       const eventdata = {
         success: true,
         response: undefined,
         path: "option",
       };
-      button.actionSuccess();
       fireEvent(this, "hass-api-called", eventdata);
       if (this.addon?.state === "started") {
         await suggestAddonRestart(this, this.hass, this.supervisor, this.addon);
@@ -225,8 +213,8 @@ class HassioAddonNetwork extends LitElement {
         "error",
         extractApiErrorMessage(err)
       );
-      button.actionError();
     }
+    button.progress = false;
   }
 
   static get styles(): CSSResultGroup {
@@ -243,9 +231,6 @@ class HassioAddonNetwork extends LitElement {
         .card-actions {
           display: flex;
           justify-content: space-between;
-        }
-        .show-optional {
-          padding: 16px;
         }
       `,
     ];

@@ -1,5 +1,6 @@
 import "@material/mwc-button/mwc-button";
 import "@material/mwc-list/mwc-list-item";
+import "@material/mwc-select/mwc-select";
 import {
   mdiLoginVariant,
   mdiMusicNote,
@@ -9,6 +10,7 @@ import {
   mdiVolumeOff,
   mdiVolumePlus,
 } from "@mdi/js";
+import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import { isComponentLoaded } from "../../../common/config/is_component_loaded";
@@ -16,14 +18,12 @@ import { stopPropagation } from "../../../common/dom/stop_propagation";
 import { supportsFeature } from "../../../common/entity/supports-feature";
 import { computeRTLDirection } from "../../../common/util/compute_rtl";
 import "../../../components/ha-icon-button";
-import "../../../components/ha-select";
 import "../../../components/ha-slider";
 import "../../../components/ha-svg-icon";
 import { showMediaBrowserDialog } from "../../../components/media-player/show-media-browser-dialog";
 import { UNAVAILABLE, UNKNOWN } from "../../../data/entity";
 import {
   computeMediaControls,
-  handleMediaControlClick,
   MediaPickedEvent,
   MediaPlayerEntity,
   SUPPORT_BROWSE_MEDIA,
@@ -48,43 +48,45 @@ class MoreInfoMediaPlayer extends LitElement {
     }
 
     const stateObj = this.stateObj;
-    const controls = computeMediaControls(stateObj, true);
+    const controls = computeMediaControls(stateObj);
 
     return html`
-      <div class="controls">
-        <div class="basic-controls">
-          ${!controls
-            ? ""
-            : controls.map(
-                (control) => html`
-                  <ha-icon-button
-                    action=${control.action}
-                    @click=${this._handleClick}
-                    .path=${control.icon}
-                    .label=${this.hass.localize(
-                      `ui.card.media_player.${control.action}`
-                    )}
-                  >
-                  </ha-icon-button>
-                `
-              )}
-        </div>
-        ${supportsFeature(stateObj, SUPPORT_BROWSE_MEDIA)
-          ? html`
-              <mwc-button
-                .label=${this.hass.localize(
-                  "ui.card.media_player.browse_media"
+      ${!controls
+        ? ""
+        : html`
+            <div class="controls">
+              <div class="basic-controls">
+                ${controls!.map(
+                  (control) => html`
+                    <ha-icon-button
+                      action=${control.action}
+                      @click=${this._handleClick}
+                      .path=${control.icon}
+                      .label=${this.hass.localize(
+                        `ui.card.media_player.${control.action}`
+                      )}
+                    >
+                    </ha-icon-button>
+                  `
                 )}
-                @click=${this._showBrowseMedia}
-              >
-                <ha-svg-icon
-                  .path=${mdiPlayBoxMultiple}
-                  slot="icon"
-                ></ha-svg-icon>
-              </mwc-button>
-            `
-          : ""}
-      </div>
+              </div>
+              ${supportsFeature(stateObj, SUPPORT_BROWSE_MEDIA)
+                ? html`
+                    <mwc-button
+                      .label=${this.hass.localize(
+                        "ui.card.media_player.browse_media"
+                      )}
+                      @click=${this._showBrowseMedia}
+                    >
+                      <ha-svg-icon
+                        .path=${mdiPlayBoxMultiple}
+                        slot="icon"
+                      ></ha-svg-icon>
+                    </mwc-button>
+                  `
+                : ""}
+            </div>
+          `}
       ${(supportsFeature(stateObj, SUPPORT_VOLUME_SET) ||
         supportsFeature(stateObj, SUPPORT_VOLUME_BUTTONS)) &&
       ![UNAVAILABLE, UNKNOWN, "off"].includes(stateObj.state)
@@ -96,13 +98,6 @@ class MoreInfoMediaPlayer extends LitElement {
                       .path=${stateObj.attributes.is_volume_muted
                         ? mdiVolumeOff
                         : mdiVolumeHigh}
-                      .label=${this.hass.localize(
-                        `ui.card.media_player.${
-                          stateObj.attributes.is_volume_muted
-                            ? "media_volume_unmute"
-                            : "media_volume_mute"
-                        }`
-                      )}
                       @click=${this._toggleMute}
                     ></ha-icon-button>
                   `
@@ -112,17 +107,11 @@ class MoreInfoMediaPlayer extends LitElement {
                     <ha-icon-button
                       action="volume_down"
                       .path=${mdiVolumeMinus}
-                      .label=${this.hass.localize(
-                        "ui.card.media_player.media_volume_down"
-                      )}
                       @click=${this._handleClick}
                     ></ha-icon-button>
                     <ha-icon-button
                       action="volume_up"
                       .path=${mdiVolumePlus}
-                      .label=${this.hass.localize(
-                        "ui.card.media_player.media_volume_up"
-                      )}
                       @click=${this._handleClick}
                     ></ha-icon-button>
                   `
@@ -147,9 +136,12 @@ class MoreInfoMediaPlayer extends LitElement {
       stateObj.attributes.source_list?.length
         ? html`
             <div class="source-input">
-              <ha-select
+              <ha-svg-icon
+                class="source-input"
+                .path=${mdiLoginVariant}
+              ></ha-svg-icon>
+              <mwc-select
                 .label=${this.hass.localize("ui.card.media_player.source")}
-                icon
                 .value=${stateObj.attributes.source!}
                 @selected=${this._handleSourceChanged}
                 fixedMenuPosition
@@ -162,8 +154,7 @@ class MoreInfoMediaPlayer extends LitElement {
                       <mwc-list-item .value=${source}>${source}</mwc-list-item>
                     `
                 )}
-                <ha-svg-icon .path=${mdiLoginVariant} slot="icon"></ha-svg-icon>
-              </ha-select>
+              </mwc-select>
             </div>
           `
         : ""}
@@ -171,10 +162,10 @@ class MoreInfoMediaPlayer extends LitElement {
       stateObj.attributes.sound_mode_list?.length
         ? html`
             <div class="sound-input">
-              <ha-select
+              <ha-svg-icon .path=${mdiMusicNote}></ha-svg-icon>
+              <mwc-select
                 .label=${this.hass.localize("ui.card.media_player.sound_mode")}
                 .value=${stateObj.attributes.sound_mode!}
-                icon
                 fixedMenuPosition
                 naturalMenuWidth
                 @selected=${this._handleSoundModeChanged}
@@ -185,8 +176,7 @@ class MoreInfoMediaPlayer extends LitElement {
                     <mwc-list-item .value=${mode}>${mode}</mwc-list-item>
                   `
                 )}
-                <ha-svg-icon .path=${mdiMusicNote} slot="icon"></ha-svg-icon>
-              </ha-select>
+              </mwc-select>
             </div>
           `
         : ""}
@@ -216,7 +206,6 @@ class MoreInfoMediaPlayer extends LitElement {
       }
 
       .basic-controls {
-        display: inline-flex;
         flex-grow: 1;
       }
 
@@ -228,8 +217,14 @@ class MoreInfoMediaPlayer extends LitElement {
         justify-content: space-between;
       }
 
-      .source-input ha-select,
-      .sound-input ha-select {
+      .source-input ha-svg-icon,
+      .sound-input ha-svg-icon {
+        padding: 7px;
+        margin-top: 24px;
+      }
+
+      .source-input mwc-select,
+      .sound-input mwc-select {
         margin-left: 10px;
         flex-grow: 1;
       }
@@ -246,10 +241,12 @@ class MoreInfoMediaPlayer extends LitElement {
   }
 
   private _handleClick(e: MouseEvent): void {
-    handleMediaControlClick(
-      this.hass!,
-      this.stateObj!,
-      (e.currentTarget as HTMLElement).getAttribute("action")!
+    this.hass!.callService(
+      "media_player",
+      (e.currentTarget! as HTMLElement).getAttribute("action")!,
+      {
+        entity_id: this.stateObj!.entity_id,
+      }
     );
   }
 

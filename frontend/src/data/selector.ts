@@ -1,31 +1,50 @@
 export type Selector =
-  | ActionSelector
   | AddonSelector
-  | AreaSelector
   | AttributeSelector
-  | BooleanSelector
-  | ColorRGBSelector
-  | ColorTempSelector
-  | DateSelector
-  | DateTimeSelector
+  | EntitySelector
   | DeviceSelector
   | DurationSelector
-  | EntitySelector
-  | IconSelector
-  | LocationSelector
-  | MediaSelector
+  | AreaSelector
+  | TargetSelector
   | NumberSelector
+  | BooleanSelector
+  | TimeSelector
+  | ActionSelector
+  | StringSelector
   | ObjectSelector
   | SelectSelector
-  | StringSelector
-  | TargetSelector
-  | TemplateSelector
-  | ThemeSelector
-  | TimeSelector;
+  | IconSelector
+  | MediaSelector;
 
-export interface ActionSelector {
+export interface EntitySelector {
+  entity: {
+    integration?: string;
+    domain?: string;
+    device_class?: string;
+  };
+}
+
+export interface AttributeSelector {
+  attribute: {
+    entity_id: string;
+  };
+}
+
+export interface DeviceSelector {
+  device: {
+    integration?: string;
+    manufacturer?: string;
+    model?: string;
+    entity?: {
+      domain?: EntitySelector["entity"]["domain"];
+      device_class?: EntitySelector["entity"]["device_class"];
+    };
+  };
+}
+
+export interface DurationSelector {
   // eslint-disable-next-line @typescript-eslint/ban-types
-  action: {};
+  duration: {};
 }
 
 export interface AddonSelector {
@@ -47,13 +66,31 @@ export interface AreaSelector {
       manufacturer?: DeviceSelector["device"]["manufacturer"];
       model?: DeviceSelector["device"]["model"];
     };
-    multiple?: boolean;
   };
 }
 
-export interface AttributeSelector {
-  attribute: {
-    entity_id?: string;
+export interface TargetSelector {
+  target: {
+    entity?: {
+      integration?: EntitySelector["entity"]["integration"];
+      domain?: EntitySelector["entity"]["domain"];
+      device_class?: EntitySelector["entity"]["device_class"];
+    };
+    device?: {
+      integration?: DeviceSelector["device"]["integration"];
+      manufacturer?: DeviceSelector["device"]["manufacturer"];
+      model?: DeviceSelector["device"]["model"];
+    };
+  };
+}
+
+export interface NumberSelector {
+  number: {
+    min: number;
+    max: number;
+    step?: number;
+    mode?: "box" | "slider";
+    unit_of_measurement?: string;
   };
 }
 
@@ -62,120 +99,14 @@ export interface BooleanSelector {
   boolean: {};
 }
 
-export interface ColorRGBSelector {
+export interface TimeSelector {
   // eslint-disable-next-line @typescript-eslint/ban-types
-  color_rgb: {};
+  time: {};
 }
 
-export interface ColorTempSelector {
-  color_temp: {
-    min_mireds?: number;
-    max_mireds?: number;
-  };
-}
-
-export interface DateSelector {
+export interface ActionSelector {
   // eslint-disable-next-line @typescript-eslint/ban-types
-  date: {};
-}
-
-export interface DateTimeSelector {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  datetime: {};
-}
-
-export interface DeviceSelector {
-  device: {
-    integration?: string;
-    manufacturer?: string;
-    model?: string;
-    entity?: {
-      domain?: EntitySelector["entity"]["domain"];
-      device_class?: EntitySelector["entity"]["device_class"];
-    };
-    multiple?: boolean;
-  };
-}
-
-export interface DurationSelector {
-  duration: {
-    enable_day?: boolean;
-  };
-}
-
-export interface EntitySelector {
-  entity: {
-    integration?: string;
-    domain?: string | string[];
-    device_class?: string;
-    multiple?: boolean;
-    include_entities?: string[];
-    exclude_entities?: string[];
-  };
-}
-
-export interface IconSelector {
-  icon: {
-    placeholder?: string;
-    fallbackPath?: string;
-  };
-}
-
-export interface LocationSelector {
-  location: { radius?: boolean; icon?: string };
-}
-
-export interface LocationSelectorValue {
-  latitude: number;
-  longitude: number;
-  radius?: number;
-}
-
-export interface MediaSelector {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  media: {};
-}
-
-export interface MediaSelectorValue {
-  entity_id?: string;
-  media_content_id?: string;
-  media_content_type?: string;
-  metadata?: {
-    title?: string;
-    thumbnail?: string | null;
-    media_class?: string;
-    children_media_class?: string | null;
-    navigateIds?: { media_content_type: string; media_content_id: string }[];
-  };
-}
-
-export interface NumberSelector {
-  number: {
-    min?: number;
-    max?: number;
-    step?: number;
-    mode?: "box" | "slider";
-    unit_of_measurement?: string;
-  };
-}
-
-export interface ObjectSelector {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  object: {};
-}
-
-export interface SelectOption {
-  value: string;
-  label: string;
-}
-
-export interface SelectSelector {
-  select: {
-    multiple?: boolean;
-    custom_value?: boolean;
-    mode?: "list" | "dropdown";
-    options: string[] | SelectOption[];
-  };
+  action: {};
 }
 
 export interface StringSelector {
@@ -199,31 +130,41 @@ export interface StringSelector {
   };
 }
 
-export interface TargetSelector {
-  target: {
-    entity?: {
-      integration?: EntitySelector["entity"]["integration"];
-      domain?: EntitySelector["entity"]["domain"];
-      device_class?: EntitySelector["entity"]["device_class"];
-    };
-    device?: {
-      integration?: DeviceSelector["device"]["integration"];
-      manufacturer?: DeviceSelector["device"]["manufacturer"];
-      model?: DeviceSelector["device"]["model"];
-    };
+export interface ObjectSelector {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  object: {};
+}
+
+export interface SelectOption {
+  value: string;
+  label: string;
+}
+
+export interface SelectSelector {
+  select: {
+    options: string[] | SelectOption[];
   };
 }
 
-export interface TemplateSelector {
+export interface IconSelector {
   // eslint-disable-next-line @typescript-eslint/ban-types
-  template: {};
+  icon: {};
 }
 
-export interface ThemeSelector {
+export interface MediaSelector {
   // eslint-disable-next-line @typescript-eslint/ban-types
-  theme: {};
+  media: {};
 }
-export interface TimeSelector {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  time: {};
+
+export interface MediaSelectorValue {
+  entity_id?: string;
+  media_content_id?: string;
+  media_content_type?: string;
+  metadata?: {
+    title?: string;
+    thumbnail?: string | null;
+    media_class?: string;
+    children_media_class?: string | null;
+    navigateIds?: { media_content_type: string; media_content_id: string }[];
+  };
 }

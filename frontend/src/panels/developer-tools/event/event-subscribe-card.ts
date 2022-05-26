@@ -1,10 +1,11 @@
 import "@material/mwc-button";
+import "@polymer/paper-input/paper-input";
 import { HassEvent } from "home-assistant-js-websocket";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { formatTime } from "../../../common/datetime/format_time";
 import "../../../components/ha-card";
-import "../../../components/ha-textfield";
+import { PolymerChangedEvent } from "../../../polymer-types";
 import { HomeAssistant } from "../../../types";
 
 @customElement("event-subscribe-card")
@@ -38,7 +39,7 @@ class EventSubscribeCard extends LitElement {
         )}
       >
         <form>
-          <ha-textfield
+          <paper-input
             .label=${this._subscribed
               ? this.hass!.localize(
                   "ui.panel.developer-tools.tabs.events.listening_to"
@@ -48,8 +49,8 @@ class EventSubscribeCard extends LitElement {
                 )}
             .disabled=${this._subscribed !== undefined}
             .value=${this._eventType}
-            @input=${this._valueChanged}
-          ></ha-textfield>
+            @value-changed=${this._valueChanged}
+          ></paper-input>
           <mwc-button
             .disabled=${this._eventType === ""}
             @click=${this._handleSubmit}
@@ -83,8 +84,8 @@ class EventSubscribeCard extends LitElement {
     `;
   }
 
-  private _valueChanged(ev): void {
-    this._eventType = ev.target.value;
+  private _valueChanged(ev: PolymerChangedEvent<string>): void {
+    this._eventType = ev.detail.value;
   }
 
   private async _handleSubmit(): Promise<void> {
@@ -115,8 +116,9 @@ class EventSubscribeCard extends LitElement {
         display: block;
         padding: 0 0 16px 16px;
       }
-      ha-textfield {
-        width: 300px;
+      paper-input {
+        display: inline-block;
+        width: 200px;
       }
       mwc-button {
         vertical-align: middle;

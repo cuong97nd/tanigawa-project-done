@@ -1,4 +1,5 @@
 import "@material/mwc-button";
+import "@polymer/paper-input/paper-input";
 import "@polymer/paper-tooltip/paper-tooltip";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
@@ -10,7 +11,6 @@ import "../../../components/ha-help-tooltip";
 import "../../../components/ha-chip-set";
 import "../../../components/ha-chip";
 import "../../../components/ha-svg-icon";
-import "../../../components/ha-textfield";
 import "../../../components/ha-switch";
 import { adminChangePassword } from "../../../data/auth";
 import {
@@ -22,6 +22,7 @@ import {
   showAlertDialog,
   showPromptDialog,
 } from "../../../dialogs/generic/show-dialog-box";
+import { PolymerChangedEvent } from "../../../polymer-types";
 import { haStyleDialog } from "../../../resources/styles";
 import { HomeAssistant } from "../../../types";
 import { UserDetailDialogParams } from "./show-dialog-user-detail";
@@ -91,13 +92,13 @@ class DialogUserDetail extends LitElement {
                 </ha-chip-set>
               `}
           <div class="form">
-            <ha-textfield
+            <paper-input
               dialogInitialFocus
               .value=${this._name}
               .disabled=${user.system_generated}
-              @input=${this._nameChanged}
-              .label=${this.hass!.localize("ui.panel.config.users.editor.name")}
-            ></ha-textfield>
+              @value-changed=${this._nameChanged}
+              label=${this.hass!.localize("ui.panel.config.users.editor.name")}
+            ></paper-input>
             <div class="row">
               <ha-formfield
                 .label=${this.hass.localize(
@@ -211,9 +212,9 @@ class DialogUserDetail extends LitElement {
     `;
   }
 
-  private _nameChanged(ev) {
+  private _nameChanged(ev: PolymerChangedEvent<string>) {
     this._error = undefined;
-    this._name = ev.target.value;
+    this._name = ev.detail.value;
   }
 
   private _adminChanged(ev): void {
@@ -321,8 +322,7 @@ class DialogUserDetail extends LitElement {
         .secondary {
           color: var(--secondary-text-color);
         }
-        ha-chip-set,
-        ha-textfield {
+        ha-chip-set {
           display: block;
         }
         .state {

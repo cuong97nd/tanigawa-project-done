@@ -1,4 +1,4 @@
-import "../../../../components/ha-textfield";
+import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { assert, assign, object, optional, string } from "superstruct";
@@ -6,7 +6,7 @@ import { isComponentLoaded } from "../../../../common/config/is_component_loaded
 import { fireEvent } from "../../../../common/dom/fire_event";
 import { HomeAssistant } from "../../../../types";
 import { ShoppingListCardConfig } from "../../cards/types";
-import "../../../../components/ha-theme-picker";
+import "../../components/hui-theme-select-editor";
 import { LovelaceCardEditor } from "../../types";
 import { baseLovelaceCardConfig } from "../structs/base-card-struct";
 import { EditorTarget, EntitiesEditorEvent } from "../types";
@@ -57,7 +57,7 @@ export class HuiShoppingListEditor
               </div>
             `
           : ""}
-        <ha-textfield
+        <paper-input
           .label="${this.hass.localize(
             "ui.panel.lovelace.editor.card.generic.title"
           )} (${this.hass.localize(
@@ -65,19 +65,14 @@ export class HuiShoppingListEditor
           )})"
           .value=${this._title}
           .configValue=${"title"}
-          @input=${this._valueChanged}
-        ></ha-textfield>
-        <ha-theme-picker
+          @value-changed=${this._valueChanged}
+        ></paper-input>
+        <hui-theme-select-editor
           .hass=${this.hass}
           .value=${this._theme}
           .configValue=${"theme"}
-          .label=${`${this.hass!.localize(
-            "ui.panel.lovelace.editor.card.generic.theme"
-          )} (${this.hass!.localize(
-            "ui.panel.lovelace.editor.card.config.optional"
-          )})`}
           @value-changed=${this._valueChanged}
-        ></ha-theme-picker>
+        ></hui-theme-select-editor>
       </div>
     `;
   }

@@ -1,7 +1,6 @@
 import { html, LitElement, PropertyValues } from "lit";
 import { customElement, property } from "lit/decorators";
 import {
-  array,
   assert,
   assign,
   literal,
@@ -11,7 +10,6 @@ import {
   union,
 } from "superstruct";
 import memoizeOne from "memoize-one";
-import { ensureArray } from "../../../../../common/ensure-array";
 import { fireEvent } from "../../../../../common/dom/fire_event";
 import { hasTemplate } from "../../../../../common/string/has-template";
 import { StateTrigger } from "../../../../../data/automation";
@@ -26,7 +24,7 @@ const stateTriggerStruct = assign(
   baseTriggerStruct,
   object({
     platform: literal("state"),
-    entity_id: optional(union([string(), array(string())])),
+    entity_id: optional(string()),
     attribute: optional(string()),
     from: optional(string()),
     to: optional(string()),
@@ -41,15 +39,11 @@ export class HaStateTrigger extends LitElement implements TriggerElement {
   @property() public trigger!: StateTrigger;
 
   public static get defaultConfig() {
-    return { entity_id: [] };
+    return { entity_id: "" };
   }
 
   private _schema = memoizeOne((entityId) => [
-    {
-      name: "entity_id",
-      required: true,
-      selector: { entity: { multiple: true } },
-    },
+    { name: "entity_id", required: true, selector: { entity: {} } },
     {
       name: "attribute",
       selector: { attribute: { entity_id: entityId } },
@@ -91,11 +85,7 @@ export class HaStateTrigger extends LitElement implements TriggerElement {
   protected render() {
     const trgFor = createDurationData(this.trigger.for);
 
-    const data = {
-      ...this.trigger,
-      entity_id: ensureArray(this.trigger.entity_id),
-      for: trgFor,
-    };
+    const data = { ...this.trigger, ...{ for: trgFor } };
     const schema = this._schema(this.trigger.entity_id);
 
     return html`

@@ -119,7 +119,6 @@ export class DialogHassioNetwork
                     html`<mwc-tab
                       .id=${device.interface}
                       .label=${device.interface}
-                      dialogInitialFocus
                     >
                     </mwc-tab>`
                 )}
@@ -316,7 +315,6 @@ export class DialogHassioNetwork
               value="auto"
               name="${version}method"
               .checked=${this._interface![version]?.method === "auto"}
-              dialogInitialFocus
             >
             </ha-radio>
           </ha-formfield>

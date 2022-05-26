@@ -21,7 +21,7 @@ import { styleMap } from "lit/directives/style-map";
 import memoizeOne from "memoize-one";
 import { restoreScroll } from "../../common/decorators/restore-scroll";
 import { fireEvent } from "../../common/dom/fire_event";
-import "../search-input";
+import "../../common/search/search-input";
 import { debounce } from "../../common/util/debounce";
 import { nextRender } from "../../common/util/render-status";
 import { haStyleScrollbar } from "../../resources/styles";
@@ -269,8 +269,8 @@ export class HaDataTable extends LitElement {
                       @change=${this._handleHeaderRowCheckboxClick}
                       .indeterminate=${this._checkedRows.length &&
                       this._checkedRows.length !== this._checkableRowsCount}
-                      .checked=${this._checkedRows.length &&
-                      this._checkedRows.length === this._checkableRowsCount}
+                      .checked=${this._checkedRows.length ===
+                      this._checkableRowsCount}
                     >
                     </ha-checkbox>
                   </div>

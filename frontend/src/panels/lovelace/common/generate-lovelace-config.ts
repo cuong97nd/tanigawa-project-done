@@ -238,10 +238,7 @@ const computeDefaultViewStates = (
   const hiddenEntities = new Set(
     entityEntries
       .filter(
-        (entry) =>
-          entry.entity_category ||
-          HIDE_PLATFORM.has(entry.platform) ||
-          entry.hidden_by
+        (entry) => entry.entity_category || HIDE_PLATFORM.has(entry.platform)
       )
       .map((entry) => entry.entity_id)
   );

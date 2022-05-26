@@ -1,12 +1,11 @@
 import "@material/mwc-button";
+import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { fireEvent } from "../../../common/dom/fire_event";
-import "../../../components/ha-alert";
 import { createCloseHeading } from "../../../components/ha-dialog";
 import "../../../components/ha-formfield";
 import "../../../components/ha-switch";
-import "../../../components/ha-textfield";
 import { Tag, UpdateTagParams } from "../../../data/tag";
 import { HassDialog } from "../../../dialogs/make-dialog-manager";
 import { haStyleDialog } from "../../../resources/styles";
@@ -72,9 +71,7 @@ class DialogTagDetail
         )}
       >
         <div>
-          ${this._error
-            ? html`<ha-alert alert-type="error">${this._error}</ha-alert>`
-            : ""}
+          ${this._error ? html` <div class="error">${this._error}</div> ` : ""}
           <div class="form">
             ${this._params.entry
               ? html`${this.hass!.localize(
@@ -82,30 +79,30 @@ class DialogTagDetail
                 )}:
                 ${this._params.entry.id}`
               : ""}
-            <ha-textfield
+            <paper-input
               dialogInitialFocus
               .value=${this._name}
               .configValue=${"name"}
-              @input=${this._valueChanged}
+              @value-changed=${this._valueChanged}
               .label=${this.hass!.localize("ui.panel.config.tag.detail.name")}
               .errorMessage=${this.hass!.localize(
                 "ui.panel.config.tag.detail.required_error_msg"
               )}
               required
               auto-validate
-            ></ha-textfield>
+            ></paper-input>
             ${!this._params.entry
-              ? html`<ha-textfield
+              ? html` <paper-input
                   .value=${this._id}
                   .configValue=${"id"}
-                  @input=${this._valueChanged}
+                  @value-changed=${this._valueChanged}
                   .label=${this.hass!.localize(
                     "ui.panel.config.tag.detail.tag_id"
                   )}
                   .placeholder=${this.hass!.localize(
                     "ui.panel.config.tag.detail.tag_id_placeholder"
                   )}
-                ></ha-textfield>`
+                ></paper-input>`
               : ""}
           </div>
           ${this._params.entry
@@ -168,12 +165,11 @@ class DialogTagDetail
     `;
   }
 
-  private _valueChanged(ev: Event) {
-    const target = ev.target as any;
-    const configValue = target.configValue;
+  private _valueChanged(ev: CustomEvent) {
+    const configValue = (ev.target as any).configValue;
 
     this._error = undefined;
-    this[`_${configValue}`] = target.value;
+    this[`_${configValue}`] = ev.detail.value;
   }
 
   private async _updateEntry() {

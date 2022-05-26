@@ -1,3 +1,4 @@
+import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { fireEvent } from "../../../common/dom/fire_event";
@@ -5,7 +6,6 @@ import "../../../components/ha-blueprint-picker";
 import "../../../components/ha-card";
 import "../../../components/ha-circular-progress";
 import "../../../components/ha-markdown";
-import "../../../components/ha-textfield";
 import "../../../components/ha-selector/ha-selector";
 import "../../../components/ha-settings-row";
 
@@ -51,7 +51,7 @@ export class HaBlueprintScriptEditor extends LitElement {
           "ui.panel.config.automation.editor.blueprint.header"
         )}</span
       >
-      <ha-card outlined>
+      <ha-card>
         <div class="blueprint-picker-container">
           ${this._blueprints
             ? Object.keys(this._blueprints).length
@@ -101,14 +101,15 @@ export class HaBlueprintScriptEditor extends LitElement {
                               value?.default}
                               @value-changed=${this._inputChanged}
                             ></ha-selector>`
-                          : html`<ha-textfield
+                          : html`<paper-input
                               .key=${key}
                               required
                               .value=${(this.config.use_blueprint.input &&
                                 this.config.use_blueprint.input[key]) ??
                               value?.default}
-                              @change=${this._inputChanged}
-                            ></ha-textfield>`}
+                              @value-changed=${this._inputChanged}
+                              no-label-float
+                            ></paper-input>`}
                       </ha-settings-row>`
                   )
                 : html`<p class="padding">
@@ -144,7 +145,7 @@ export class HaBlueprintScriptEditor extends LitElement {
     ev.stopPropagation();
     const target = ev.target as any;
     const key = target.key;
-    const value = ev.detail?.value ?? target.value;
+    const value = ev.detail.value;
     if (
       (this.config.use_blueprint.input &&
         this.config.use_blueprint.input[key] === value) ||
@@ -186,7 +187,9 @@ export class HaBlueprintScriptEditor extends LitElement {
           --paper-time-input-justify-content: flex-end;
           border-top: 1px solid var(--divider-color);
         }
-        :host(:not([narrow])) ha-settings-row ha-textfield,
+        :host(:not([narrow])) ha-settings-row paper-input {
+          width: 60%;
+        }
         :host(:not([narrow])) ha-settings-row ha-selector {
           width: 60%;
         }

@@ -1,13 +1,13 @@
 import "@material/mwc-list/mwc-list";
 import "@material/mwc-list/mwc-list-item";
 import "@material/mwc-list/mwc-radio-list-item";
+import "@material/mwc-select/mwc-select";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators";
 import { fireEvent } from "../../../../common/dom/fire_event";
 import { stopPropagation } from "../../../../common/dom/stop_propagation";
 import { createCloseHeading } from "../../../../components/ha-dialog";
 import "../../../../components/ha-icon";
-import "../../../../components/ha-select";
 import {
   fetchConfig,
   fetchDashboards,
@@ -69,7 +69,7 @@ export class HuiDialogSelectView extends LitElement {
         )}
       >
         ${this._params.allowDashboardChange
-          ? html`<ha-select
+          ? html`<mwc-select
               .label=${this.hass.localize(
                 "ui.panel.lovelace.editor.select_view.dashboard_label"
               )}
@@ -100,7 +100,7 @@ export class HuiDialogSelectView extends LitElement {
                   >
                 `;
               })}
-            </ha-select>`
+            </mwc-select>`
           : ""}
         ${this._config
           ? this._config.views.length > 1
@@ -183,7 +183,7 @@ export class HuiDialogSelectView extends LitElement {
     return [
       haStyleDialog,
       css`
-        ha-select {
+        mwc-select {
           width: 100%;
         }
       `,

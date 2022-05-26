@@ -1,7 +1,7 @@
 import "@material/mwc-button";
 import { ActionDetail } from "@material/mwc-list";
 import "@material/mwc-list/mwc-list-item";
-import { mdiBackupRestore, mdiDelete, mdiDotsVertical, mdiPlus } from "@mdi/js";
+import { mdiDelete, mdiDotsVertical, mdiPlus } from "@mdi/js";
 import {
   css,
   CSSResultGroup,
@@ -166,15 +166,7 @@ export class HassioBackups extends LitElement {
     }
     return html`
       <hass-tabs-subpage-data-table
-        .tabs=${atLeastVersion(this.hass.config.version, 2022, 5)
-          ? [
-              {
-                translationKey: "panel.backups",
-                path: `/hassio/backups`,
-                iconPath: mdiBackupRestore,
-              },
-            ]
-          : supervisorTabs(this.hass)}
+        .tabs=${supervisorTabs(this.hass)}
         .hass=${this.hass}
         .localizeFunc=${this.supervisor.localize}
         .searchLabel=${this.supervisor.localize("search")}
@@ -190,9 +182,7 @@ export class HassioBackups extends LitElement {
         selectable
         hasFab
         .mainPage=${!atLeastVersion(this.hass.config.version, 2021, 12)}
-        back-path=${atLeastVersion(this.hass.config.version, 2022, 5)
-          ? "/config/system"
-          : "/config"}
+        back-path="/config"
         supervisor
       >
         <ha-button-menu

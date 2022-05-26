@@ -26,7 +26,6 @@ export class CloudAlexaPref extends LitElement {
 
     return html`
       <ha-card
-        outlined
         header=${this.hass!.localize(
           "ui.panel.config.cloud.account.alexa.title"
         )}

@@ -25,7 +25,13 @@ export class HaChipSet extends LitElement {
       ${unsafeCSS(chipStyles)}
 
       slot::slotted(ha-chip) {
-        margin: 4px 4px 4px 0;
+        margin: 4px;
+      }
+      slot::slotted(ha-chip:first-of-type) {
+        margin-left: -4px;
+      }
+      slot::slotted(ha-chip:last-of-type) {
+        margin-right: -4px;
       }
     `;
   }

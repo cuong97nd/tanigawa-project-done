@@ -1,13 +1,12 @@
 import "@material/mwc-button/mwc-button";
-import { mdiAlertOutline } from "@mdi/js";
+import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
-import { customElement, property, query, state } from "lit/decorators";
-import { ifDefined } from "lit/directives/if-defined";
+import { customElement, property, state } from "lit/decorators";
+import { classMap } from "lit/directives/class-map";
 import { fireEvent } from "../../common/dom/fire_event";
 import "../../components/ha-dialog";
-import "../../components/ha-svg-icon";
 import "../../components/ha-switch";
-import { HaTextField } from "../../components/ha-textfield";
+import { PolymerChangedEvent } from "../../polymer-types";
 import { haStyleDialog } from "../../resources/styles";
 import { HomeAssistant } from "../../types";
 import { DialogBoxParams } from "./show-dialog-box";
@@ -18,10 +17,13 @@ class DialogBox extends LitElement {
 
   @state() private _params?: DialogBoxParams;
 
-  @query("ha-textfield") private _textField?: HaTextField;
+  @state() private _value?: string;
 
   public async showDialog(params: DialogBoxParams): Promise<void> {
     this._params = params;
+    if (params.prompt) {
+      this._value = params.defaultValue;
+    }
   }
 
   public closeDialog(): boolean {
@@ -49,38 +51,38 @@ class DialogBox extends LitElement {
         ?escapeKeyAction=${confirmPrompt}
         @closed=${this._dialogClosed}
         defaultAction="ignore"
-        .heading=${html`${this._params.warning
-          ? html`<ha-svg-icon
-              .path=${mdiAlertOutline}
-              style="color: var(--warning-color)"
-            ></ha-svg-icon> `
-          : ""}${this._params.title
+        .heading=${this._params.title
           ? this._params.title
           : this._params.confirmation &&
-            this.hass.localize(
-              "ui.dialogs.generic.default_confirmation_title"
-            )}`}
+            this.hass.localize("ui.dialogs.generic.default_confirmation_title")}
       >
         <div>
           ${this._params.text
             ? html`
-                <p class=${this._params.prompt ? "no-bottom-padding" : ""}>
+                <p
+                  class=${classMap({
+                    "no-bottom-padding": Boolean(this._params.prompt),
+                    warning: Boolean(this._params.warning),
+                  })}
+                >
                   ${this._params.text}
                 </p>
               `
             : ""}
           ${this._params.prompt
             ? html`
-                <ha-textfield
+                <paper-input
                   dialogInitialFocus
-                  value=${ifDefined(this._params.defaultValue)}
+                  .value=${this._value}
+                  @keyup=${this._handleKeyUp}
+                  @value-changed=${this._valueChanged}
                   .label=${this._params.inputLabel
                     ? this._params.inputLabel
                     : ""}
                   .type=${this._params.inputType
                     ? this._params.inputType
                     : "text"}
-                ></ha-textfield>
+                ></paper-input>
               `
             : ""}
         </div>
@@ -105,6 +107,10 @@ class DialogBox extends LitElement {
     `;
   }
 
+  private _valueChanged(ev: PolymerChangedEvent<string>) {
+    this._value = ev.detail.value;
+  }
+
   private _dismiss(): void {
     if (this._params?.cancel) {
       this._params.cancel();
@@ -112,9 +118,15 @@ class DialogBox extends LitElement {
     this._close();
   }
 
+  private _handleKeyUp(ev: KeyboardEvent) {
+    if (ev.keyCode === 13) {
+      this._confirm();
+    }
+  }
+
   private _confirm(): void {
     if (this._params!.confirm) {
-      this._params!.confirm(this._textField?.value);
+      this._params!.confirm(this._value);
     }
     this._close();
   }
@@ -160,6 +172,9 @@ class DialogBox extends LitElement {
         ha-dialog {
           /* Place above other dialogs */
           --dialog-z-index: 104;
+        }
+        .warning {
+          color: var(--warning-color);
         }
       `,
     ];

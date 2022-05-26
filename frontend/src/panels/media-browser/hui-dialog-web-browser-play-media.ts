@@ -55,7 +55,7 @@ export class HuiDialogWebBrowserPlayMedia extends LitElement {
             `
           : mediaType === "video"
           ? html`
-              <video controls autoplay playsinline>
+              <video controls autoplay playsinline src=${this._params.sourceUrl}>
                 <source
                   src=${this._params.sourceUrl}
                   type=${this._params.sourceType}

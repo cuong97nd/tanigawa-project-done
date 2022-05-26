@@ -28,13 +28,12 @@ import { navigate } from "../../../common/navigate";
 import { computeRTL } from "../../../common/util/compute_rtl";
 import "../../../components/device/ha-device-picker";
 import "../../../components/entity/ha-entities-picker";
-import "../../../components/ha-area-picker";
 import "../../../components/ha-card";
 import "../../../components/ha-fab";
 import "../../../components/ha-icon-button";
 import "../../../components/ha-icon-picker";
+import "../../../components/ha-area-picker";
 import "../../../components/ha-svg-icon";
-import "../../../components/ha-textfield";
 import {
   computeDeviceName,
   DeviceRegistryEntry,
@@ -55,7 +54,6 @@ import {
   SceneConfig,
   SceneEntities,
   SceneEntity,
-  SceneMetaData,
   SCENE_IGNORED_DOMAINS,
   showSceneEditor,
 } from "../../../data/scene";
@@ -288,16 +286,16 @@ export class HaSceneEditor extends SubscribeMixin(
                       "ui.panel.config.scene.editor.introduction"
                     )}
                   </div>
-                  <ha-card outlined>
+                  <ha-card>
                     <div class="card-content">
-                      <ha-textfield
+                      <paper-input
                         .value=${this._config.name}
                         .name=${"name"}
-                        @change=${this._valueChanged}
-                        .label=${this.hass.localize(
+                        @value-changed=${this._valueChanged}
+                        label=${this.hass.localize(
                           "ui.panel.config.scene.editor.name"
                         )}
-                      ></ha-textfield>
+                      ></paper-input>
                       <ha-icon-picker
                         .label=${this.hass.localize(
                           "ui.panel.config.scene.editor.icon"
@@ -336,7 +334,7 @@ export class HaSceneEditor extends SubscribeMixin(
                   ${devices.map(
                     (device) =>
                       html`
-                        <ha-card outlined>
+                        <ha-card>
                           <h1 class="card-header">
                             ${device.name}
                             <ha-icon-button
@@ -374,7 +372,6 @@ export class HaSceneEditor extends SubscribeMixin(
                   )}
 
                   <ha-card
-                    outlined
                     .header=${this.hass.localize(
                       "ui.panel.config.scene.editor.devices.add"
                     )}
@@ -407,7 +404,6 @@ export class HaSceneEditor extends SubscribeMixin(
                         ${entities.length
                           ? html`
                               <ha-card
-                                outlined
                                 class="entities"
                                 .header=${this.hass.localize(
                                   "ui.panel.config.scene.editor.entities.without_device"
@@ -448,7 +444,6 @@ export class HaSceneEditor extends SubscribeMixin(
                           : ""}
 
                         <ha-card
-                          outlined
                           header=${this.hass.localize(
                             "ui.panel.config.scene.editor.entities.add"
                           )}
@@ -629,22 +624,16 @@ export class HaSceneEditor extends SubscribeMixin(
     const filteredEntityReg = this._entityRegistryEntries.filter((entityReg) =>
       this._entities.includes(entityReg.entity_id)
     );
-    const newDevices: string[] = [];
+    this._devices = [];
 
     for (const entityReg of filteredEntityReg) {
       if (!entityReg.device_id) {
         continue;
       }
-      const entityMetaData = config.metadata?.[entityReg.entity_id];
-      if (
-        !newDevices.includes(entityReg.device_id) &&
-        !entityMetaData?.entity_only
-      ) {
-        newDevices.push(entityReg.device_id);
+      if (!this._devices.includes(entityReg.device_id)) {
+        this._devices = [...this._devices, entityReg.device_id];
       }
     }
-
-    this._devices = newDevices;
   }
 
   private _entityPicked(ev: CustomEvent) {
@@ -653,8 +642,18 @@ export class HaSceneEditor extends SubscribeMixin(
     if (this._entities.includes(entityId)) {
       return;
     }
-    this._entities = [...this._entities, entityId];
-    this._storeState(entityId);
+    const entityRegistry = this._entityRegistryEntries.find(
+      (entityReg) => entityReg.entity_id === entityId
+    );
+    if (
+      entityRegistry?.device_id &&
+      !this._devices.includes(entityRegistry.device_id)
+    ) {
+      this._pickDevice(entityRegistry.device_id);
+    } else {
+      this._entities = [...this._entities, entityId];
+      this._storeState(entityId);
+    }
     this._dirty = true;
   }
 
@@ -702,14 +701,14 @@ export class HaSceneEditor extends SubscribeMixin(
     this._dirty = true;
   }
 
-  private _valueChanged(ev: Event) {
+  private _valueChanged(ev: CustomEvent) {
     ev.stopPropagation();
     const target = ev.target as any;
     const name = target.name;
     if (!name) {
       return;
     }
-    let newVal = (ev as CustomEvent).detail?.value ?? target.value;
+    let newVal = ev.detail.value;
     if (target.type === "number") {
       newVal = Number(newVal);
     }
@@ -812,28 +811,6 @@ export class HaSceneEditor extends SubscribeMixin(
     );
   }
 
-  private _calculateMetaData(): SceneMetaData {
-    const output: SceneMetaData = {};
-
-    for (const entityReg of this._entityRegistryEntries) {
-      if (!this._entities.includes(entityReg.entity_id)) {
-        continue;
-      }
-
-      const entityState = this._getCurrentState(entityReg.entity_id);
-
-      if (!entityState) {
-        continue;
-      }
-
-      output[entityReg.entity_id] = {
-        entity_only: !this._devices.includes(entityReg.device_id!),
-      };
-    }
-
-    return output;
-  }
-
   private _calculateStates(): SceneEntities {
     const output: SceneEntities = {};
     this._entities.forEach((entityId) => {
@@ -866,11 +843,7 @@ export class HaSceneEditor extends SubscribeMixin(
 
   private async _saveScene(): Promise<void> {
     const id = !this.sceneId ? "" + Date.now() : this.sceneId!;
-    this._config = {
-      ...this._config!,
-      entities: this._calculateStates(),
-      metadata: this._calculateMetaData(),
-    };
+    this._config = { ...this._config!, entities: this._calculateStates() };
     try {
       this._saving = true;
       await saveScene(this.hass, id, this._config);
@@ -1016,9 +989,6 @@ export class HaSceneEditor extends SubscribeMixin(
         ha-entity-picker {
           display: block;
           margin-top: 8px;
-        }
-        ha-textfield {
-          display: block;
         }
       `,
     ];

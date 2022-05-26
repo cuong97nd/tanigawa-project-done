@@ -1,7 +1,6 @@
 import { mdiHelpCircle, mdiPlus } from "@mdi/js";
-import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
-import { customElement, property, state } from "lit/decorators";
+import { customElement, property } from "lit/decorators";
 import { styleMap } from "lit/directives/style-map";
 import memoizeOne from "memoize-one";
 import "../../../components/ha-fab";
@@ -10,20 +9,12 @@ import "../../../components/ha-svg-icon";
 import {
   AreaRegistryEntry,
   createAreaRegistryEntry,
-  subscribeAreaRegistry,
 } from "../../../data/area_registry";
-import {
-  DeviceRegistryEntry,
-  subscribeDeviceRegistry,
-} from "../../../data/device_registry";
-import {
-  EntityRegistryEntry,
-  subscribeEntityRegistry,
-} from "../../../data/entity_registry";
+import type { DeviceRegistryEntry } from "../../../data/device_registry";
+import type { EntityRegistryEntry } from "../../../data/entity_registry";
 import { showAlertDialog } from "../../../dialogs/generic/show-dialog-box";
 import "../../../layouts/hass-loading-screen";
 import "../../../layouts/hass-tabs-subpage";
-import { SubscribeMixin } from "../../../mixins/subscribe-mixin";
 import { HomeAssistant, Route } from "../../../types";
 import "../ha-config-section";
 import { configSections } from "../ha-panel-config";
@@ -33,7 +24,7 @@ import {
 } from "./show-dialog-area-registry-detail";
 
 @customElement("ha-config-areas-dashboard")
-export class HaConfigAreasDashboard extends SubscribeMixin(LitElement) {
+export class HaConfigAreasDashboard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property() public isWide?: boolean;
@@ -42,13 +33,13 @@ export class HaConfigAreasDashboard extends SubscribeMixin(LitElement) {
 
   @property() public route!: Route;
 
-  @state() private _areas!: AreaRegistryEntry[];
+  @property() public areas!: AreaRegistryEntry[];
 
-  @state() private _devices!: DeviceRegistryEntry[];
+  @property() public devices!: DeviceRegistryEntry[];
 
-  @state() private _entities!: EntityRegistryEntry[];
+  @property() public entities!: EntityRegistryEntry[];
 
-  private _processAreas = memoizeOne(
+  private _areas = memoizeOne(
     (
       areas: AreaRegistryEntry[],
       devices: DeviceRegistryEntry[],
@@ -84,20 +75,6 @@ export class HaConfigAreasDashboard extends SubscribeMixin(LitElement) {
       })
   );
 
-  protected hassSubscribe(): (UnsubscribeFunc | Promise<UnsubscribeFunc>)[] {
-    return [
-      subscribeAreaRegistry(this.hass.connection, (areas) => {
-        this._areas = areas;
-      }),
-      subscribeDeviceRegistry(this.hass.connection, (entries) => {
-        this._devices = entries;
-      }),
-      subscribeEntityRegistry(this.hass.connection, (entries) => {
-        this._entities = entries;
-      }),
-    ];
-  }
-
   protected render(): TemplateResult {
     return html`
       <hass-tabs-subpage
@@ -105,7 +82,7 @@ export class HaConfigAreasDashboard extends SubscribeMixin(LitElement) {
         .narrow=${this.narrow}
         .isWide=${this.isWide}
         back-path="/config"
-        .tabs=${configSections.areas}
+        .tabs=${configSections.devices}
         .route=${this.route}
       >
         <ha-icon-button
@@ -115,62 +92,56 @@ export class HaConfigAreasDashboard extends SubscribeMixin(LitElement) {
           @click=${this._showHelp}
         ></ha-icon-button>
         <div class="container">
-          ${!this._areas || !this._devices || !this._entities
-            ? ""
-            : this._processAreas(
-                this._areas,
-                this._devices,
-                this._entities
-              ).map(
-                (area) =>
-                  html`<a href=${`/config/areas/area/${area.area_id}`}
-                    ><ha-card outlined>
-                      <div
-                        style=${styleMap({
-                          backgroundImage: area.picture
-                            ? `url(${area.picture})`
-                            : undefined,
-                        })}
-                        class="picture ${!area.picture ? "placeholder" : ""}"
-                      ></div>
-                      <h1 class="card-header">${area.name}</h1>
-                      <div class="card-content">
-                        <div>
-                          ${area.devices
-                            ? html`
-                                ${this.hass.localize(
-                                  "ui.panel.config.integrations.config_entry.devices",
-                                  "count",
-                                  area.devices
-                                )}${area.services ? "," : ""}
-                              `
-                            : ""}
-                          ${area.services
-                            ? html`
-                                ${this.hass.localize(
-                                  "ui.panel.config.integrations.config_entry.services",
-                                  "count",
-                                  area.services
-                                )}
-                              `
-                            : ""}
-                          ${(area.devices || area.services) && area.entities
-                            ? this.hass.localize("ui.common.and")
-                            : ""}
-                          ${area.entities
-                            ? html`
-                                ${this.hass.localize(
-                                  "ui.panel.config.integrations.config_entry.entities",
-                                  "count",
-                                  area.entities
-                                )}
-                              `
-                            : ""}
-                        </div>
-                      </div>
-                    </ha-card></a
-                  >`
-              )}
+          ${this._areas(this.areas, this.devices, this.entities).map(
+            (area) =>
+              html`<a href=${`/config/areas/area/${area.area_id}`}
+                ><ha-card outlined>
+                  <div
+                    style=${styleMap({
+                      backgroundImage: area.picture
+                        ? `url(${area.picture})`
+                        : undefined,
+                    })}
+                    class="picture ${!area.picture ? "placeholder" : ""}"
+                  ></div>
+                  <h1 class="card-header">${area.name}</h1>
+                  <div class="card-content">
+                    <div>
+                      ${area.devices
+                        ? html`
+                            ${this.hass.localize(
+                              "ui.panel.config.integrations.config_entry.devices",
+                              "count",
+                              area.devices
+                            )}${area.services ? "," : ""}
+                          `
+                        : ""}
+                      ${area.services
+                        ? html`
+                            ${this.hass.localize(
+                              "ui.panel.config.integrations.config_entry.services",
+                              "count",
+                              area.services
+                            )}
+                          `
+                        : ""}
+                      ${(area.devices || area.services) && area.entities
+                        ? this.hass.localize("ui.common.and")
+                        : ""}
+                      ${area.entities
+                        ? html`
+                            ${this.hass.localize(
+                              "ui.panel.config.integrations.config_entry.entities",
+                              "count",
+                              area.entities
+                            )}
+                          `
+                        : ""}
+                    </div>
+                  </div>
+                </ha-card></a
+              >`
+          )}
         </div>
         <ha-fab
           slot="fab"

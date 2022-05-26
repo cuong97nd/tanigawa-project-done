@@ -68,7 +68,6 @@ class HassioAddonRepositoryEl extends LitElement {
           ${addons.map(
             (addon) => html`
               <ha-card
-                outlined
                 .addon=${addon}
                 class=${addon.available ? "" : "not_available"}
                 @click=${this._addonTapped}

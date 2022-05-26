@@ -6,7 +6,6 @@ import { NumberSelector } from "../../data/selector";
 import { HomeAssistant } from "../../types";
 import "../ha-slider";
 import "../ha-textfield";
-import "../ha-input-helper-text";
 
 @customElement("ha-selector-number")
 export class HaNumberSelector extends LitElement {
@@ -20,71 +19,52 @@ export class HaNumberSelector extends LitElement {
 
   @property() public label?: string;
 
-  @property() public helper?: string;
-
-  @property({ type: Boolean }) public required = true;
-
   @property({ type: Boolean }) public disabled = false;
 
   protected render() {
-    const isBox = this.selector.number.mode === "box";
-
-    return html`
-      ${this.label ? html`${this.label}${this.required ? " *" : ""}` : ""}
-      <div class="input">
-        ${!isBox
-          ? html`<ha-slider
-              .min=${this.selector.number.min}
-              .max=${this.selector.number.max}
-              .value=${this._value}
-              .step=${this.selector.number.step ?? 1}
-              .disabled=${this.disabled}
-              .required=${this.required}
-              pin
-              ignore-bar-touch
-              @change=${this._handleSliderChange}
-            >
-            </ha-slider>`
-          : ""}
-        <ha-textfield
-          inputMode="numeric"
-          pattern="[0-9]+([\\.][0-9]+)?"
-          .label=${this.selector.number.mode !== "box" ? undefined : this.label}
-          .placeholder=${this.placeholder}
-          class=${classMap({ single: this.selector.number.mode === "box" })}
-          .min=${this.selector.number.min}
-          .max=${this.selector.number.max}
-          .value=${this.value ?? ""}
-          .step=${this.selector.number.step ?? 1}
-          helperPersistent
-          .helper=${isBox ? this.helper : undefined}
-          .disabled=${this.disabled}
-          .required=${this.required}
-          .suffix=${this.selector.number.unit_of_measurement}
-          type="number"
-          autoValidate
-          ?no-spinner=${this.selector.number.mode !== "box"}
-          @input=${this._handleInputChange}
-        >
-        </ha-textfield>
-      </div>
-      ${!isBox && this.helper
-        ? html`<ha-input-helper-text>${this.helper}</ha-input-helper-text>`
+    return html`${this.label}
+      ${this.selector.number.mode !== "box"
+        ? html`<ha-slider
+            .min=${this.selector.number.min}
+            .max=${this.selector.number.max}
+            .value=${this._value}
+            .step=${this.selector.number.step ?? 1}
+            .disabled=${this.disabled}
+            pin
+            ignore-bar-touch
+            @change=${this._handleSliderChange}
+          >
+          </ha-slider>`
         : ""}
-    `;
+      <ha-textfield
+        inputMode="numeric"
+        pattern="[0-9]+([\\.][0-9]+)?"
+        .label=${this.selector.number.mode !== "box" ? undefined : this.label}
+        .placeholder=${this.placeholder}
+        class=${classMap({ single: this.selector.number.mode === "box" })}
+        .min=${this.selector.number.min}
+        .max=${this.selector.number.max}
+        .value=${this.value}
+        .step=${this.selector.number.step ?? 1}
+        .disabled=${this.disabled}
+        .suffix=${this.selector.number.unit_of_measurement}
+        type="number"
+        autoValidate
+        ?no-spinner=${this.selector.number.mode !== "box"}
+        @input=${this._handleInputChange}
+      >
+      </ha-textfield>`;
   }
 
   private get _value() {
-    return this.value ?? (this.selector.number.min || 0);
+    return this.value ?? 0;
   }
 
   private _handleInputChange(ev) {
     ev.stopPropagation();
     const value =
       ev.target.value === "" || isNaN(ev.target.value)
-        ? this.required
-          ? this.selector.number.min || 0
-          : undefined
+        ? undefined
         : Number(ev.target.value);
     if (this.value === value) {
       return;
@@ -103,11 +83,10 @@ export class HaNumberSelector extends LitElement {
 
   static get styles(): CSSResultGroup {
     return css`
-      .input {
+      :host {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        direction: ltr;
       }
       ha-slider {
         flex: 1;

@@ -40,7 +40,6 @@ export class CloudWebhooks extends LitElement {
   protected render() {
     return html`
       <ha-card
-        outlined
         header=${this.hass!.localize(
           "ui.panel.config.cloud.account.webhooks.title"
         )}

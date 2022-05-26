@@ -17,6 +17,7 @@ import "../../../../../components/ha-svg-icon";
 import {
   fetchZwaveDataCollectionStatus,
   fetchZwaveNetworkStatus,
+  fetchZwaveNodeStatus,
   fetchZwaveProvisioningEntries,
   InclusionState,
   setZwaveDataCollectionPreference,
@@ -24,6 +25,7 @@ import {
   stopZwaveInclusion,
   ZWaveJSClient,
   ZWaveJSNetwork,
+  ZWaveJSNodeStatus,
   ZwaveJSProvisioningEntry,
 } from "../../../../../data/zwave_js";
 import {
@@ -58,6 +60,8 @@ class ZWaveJSConfigDashboard extends LitElement {
 
   @state() private _network?: ZWaveJSNetwork;
 
+  @state() private _nodes?: ZWaveJSNodeStatus[];
+
   @state() private _provisioningEntries?: ZwaveJSProvisioningEntry[];
 
   @state() private _status?: ZWaveJSClient["state"];
@@ -80,8 +84,9 @@ class ZWaveJSConfigDashboard extends LitElement {
     if (ERROR_STATES.includes(this._configEntry.state)) {
       return this._renderErrorScreen();
     }
+
     const notReadyDevices =
-      this._network?.controller.nodes.filter((node) => !node.ready).length ?? 0;
+      this._nodes?.filter((node) => !node.ready).length ?? 0;
 
     return html`
       <hass-tabs-subpage
@@ -232,10 +237,8 @@ class ZWaveJSConfigDashboard extends LitElement {
                     <mwc-button
                       @click=${this._removeNodeClicked}
                       .disabled=${this._status !== "connected" ||
-                      (this._network?.controller.inclusion_state !==
-                        InclusionState.Idle &&
-                        this._network?.controller.inclusion_state !==
-                          InclusionState.SmartStart)}
+                      this._network?.controller.inclusion_state !==
+                        InclusionState.Idle}
                     >
                       ${this.hass.localize(
                         "ui.panel.config.zwave_js.common.remove_node"
@@ -283,7 +286,7 @@ class ZWaveJSConfigDashboard extends LitElement {
                       data collected, can be found in the
                       <a
                         target="_blank"
-                        href="https://zwave-js.github.io/node-zwave-js/#/data-collection/data-collection"
+                        href="https://zwave-js.github.io/node-zwave-js/#/data-collection/data-collection?id=usage-statistics"
                         >Z-Wave JS data collection documentation</a
                       >.
                     </p>
@@ -301,9 +304,7 @@ class ZWaveJSConfigDashboard extends LitElement {
           ?rtl=${computeRTL(this.hass)}
           @click=${this._addNodeClicked}
           .disabled=${this._status !== "connected" ||
-          (this._network?.controller.inclusion_state !== InclusionState.Idle &&
-            this._network?.controller.inclusion_state !==
-              InclusionState.SmartStart)}
+          this._network?.controller.inclusion_state !== InclusionState.Idle}
         >
           <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
         </ha-fab>
@@ -346,7 +347,7 @@ class ZWaveJSConfigDashboard extends LitElement {
       } else {
         stateTextExtra = html`
           <br />
-          <a href="/config/logs?filter=zwave_js"
+          <a href="/config/logs"
             >${this.hass.localize(
               "ui.panel.config.integrations.config_entry.check_the_logs"
             )}</a
@@ -379,9 +380,7 @@ class ZWaveJSConfigDashboard extends LitElement {
     if (!this.configEntryId) {
       return;
     }
-    const configEntries = await getConfigEntries(this.hass, {
-      domain: "zwave_js",
-    });
+    const configEntries = await getConfigEntries(this.hass);
     this._configEntry = configEntries.find(
       (entry) => entry.entry_id === this.configEntryId!
     );
@@ -409,6 +408,18 @@ class ZWaveJSConfigDashboard extends LitElement {
     this._dataCollectionOptIn =
       dataCollectionStatus.opted_in === true ||
       dataCollectionStatus.enabled === true;
+
+    this._fetchNodeStatus();
+  }
+
+  private async _fetchNodeStatus() {
+    if (!this._network) {
+      return;
+    }
+    const nodeStatePromisses = this._network.controller.nodes.map((nodeId) =>
+      fetchZwaveNodeStatus(this.hass, this.configEntryId!, nodeId)
+    );
+    this._nodes = await Promise.all(nodeStatePromisses);
   }
 
   private async _addNodeClicked() {
@@ -452,9 +463,7 @@ class ZWaveJSConfigDashboard extends LitElement {
     if (!this.configEntryId) {
       return;
     }
-    const configEntries = await getConfigEntries(this.hass, {
-      domain: "zwave_js",
-    });
+    const configEntries = await getConfigEntries(this.hass);
     const configEntry = configEntries.find(
       (entry) => entry.entry_id === this.configEntryId
     );

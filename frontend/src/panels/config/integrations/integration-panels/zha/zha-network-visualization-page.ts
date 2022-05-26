@@ -8,7 +8,7 @@ import {
   Node,
 } from "vis-network/peer/esm/vis-network";
 import { navigate } from "../../../../../common/navigate";
-import "../../../../../components/search-input";
+import "../../../../../common/search/search-input";
 import "../../../../../components/device/ha-device-picker";
 import "../../../../../components/ha-button-menu";
 import "../../../../../components/ha-checkbox";
@@ -144,6 +144,8 @@ export class ZHANetworkVisualizationPage extends LitElement {
               <div slot="header">
                 <search-input
                   .hass=${this.hass}
+                  no-label-float
+                  no-underline
                   class="header"
                   @value-changed=${this._handleSearchChange}
                   .filter=${this._filter}
@@ -159,6 +161,8 @@ export class ZHANetworkVisualizationPage extends LitElement {
           ${!this.narrow
             ? html`<search-input
                 .hass=${this.hass}
+                no-label-float
+                no-underline
                 @value-changed=${this._handleSearchChange}
                 .filter=${this._filter}
                 .label=${this.hass.localize(

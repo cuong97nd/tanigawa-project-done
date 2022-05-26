@@ -2,7 +2,6 @@ import "@material/mwc-button";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import "../../../../src/components/ha-alert";
-import "../../../../src/components/ha-ansi-to-html";
 import "../../../../src/components/ha-card";
 import {
   fetchHassioAddonLogs,
@@ -12,6 +11,7 @@ import { extractApiErrorMessage } from "../../../../src/data/hassio/common";
 import { Supervisor } from "../../../../src/data/supervisor/supervisor";
 import { haStyle } from "../../../../src/resources/styles";
 import { HomeAssistant } from "../../../../src/types";
+import "../../components/hassio-ansi-to-html";
 import { hassioStyle } from "../../resources/hassio-style";
 
 @customElement("hassio-addon-logs")
@@ -34,15 +34,15 @@ class HassioAddonLogs extends LitElement {
   protected render(): TemplateResult {
     return html`
       <h1>${this.addon.name}</h1>
-      <ha-card outlined>
+      <ha-card>
         ${this._error
           ? html`<ha-alert alert-type="error">${this._error}</ha-alert>`
           : ""}
         <div class="card-content">
           ${this._content
-            ? html`<ha-ansi-to-html
+            ? html`<hassio-ansi-to-html
                 .content=${this._content}
-              ></ha-ansi-to-html>`
+              ></hassio-ansi-to-html>`
             : ""}
         </div>
         <div class="card-actions">

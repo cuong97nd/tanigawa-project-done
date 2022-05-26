@@ -3,11 +3,10 @@
     "minor_version": 3,
     "key": "core.device_registry",
     "data": {
-        "devices": [
+        "devices": [],
+        "deleted_devices": [
             {
-                "config_entries": [
-                    "9fbf0e451fa66601e3ec7723d41d9743"
-                ],
+                "config_entries": [],
                 "connections": [
                     [
                         "mac",
@@ -20,20 +19,9 @@
                         "B4:B0:24:CD:CB:2D"
                     ]
                 ],
-                "manufacturer": "tp-link",
-                "model": "Tapo C200",
-                "name": "sdg",
-                "sw_version": "1.1.17 Build 220107 Rel.10833n(4A50)",
-                "hw_version": null,
-                "entry_type": null,
                 "id": "16cde28f4e399b0aee5ad610fa502450",
-                "via_device_id": null,
-                "area_id": null,
-                "name_by_user": null,
-                "disabled_by": null,
-                "configuration_url": "http://http://10.0.1.113:2020/onvif/device_service:2020"
+                "orphaned_timestamp": 1653475260.3898969
             }
-        ],
-        "deleted_devices": []
+        ]
     }
 }

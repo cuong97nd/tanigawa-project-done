@@ -44,14 +44,6 @@ export interface ChooseActionTraceStep extends BaseTraceStep {
   result?: { choice: number | "default" };
 }
 
-export interface IfActionTraceStep extends BaseTraceStep {
-  result?: { choice: "then" | "else" };
-}
-
-export interface StopActionTraceStep extends BaseTraceStep {
-  result?: { stop: string; error: boolean };
-}
-
 export interface ChooseChoiceActionTraceStep extends BaseTraceStep {
   result?: { result: boolean };
 }
@@ -185,11 +177,7 @@ export const getDataFromPath = (
     const asNumber = Number(raw);
 
     if (isNaN(asNumber)) {
-      const tempResult = result[raw];
-      if (!tempResult && raw === "sequence") {
-        continue;
-      }
-      result = tempResult;
+      result = result[raw];
       continue;
     }
 

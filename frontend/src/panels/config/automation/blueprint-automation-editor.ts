@@ -1,6 +1,7 @@
 import "@material/mwc-button/mwc-button";
+import "@polymer/paper-input/paper-textarea";
 import { HassEntity } from "home-assistant-js-websocket";
-import { css, CSSResultGroup, html, LitElement, PropertyValues } from "lit";
+import { css, CSSResultGroup, html, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { fireEvent } from "../../../common/dom/fire_event";
 import "../../../components/entity/ha-entity-toggle";
@@ -10,7 +11,6 @@ import "../../../components/ha-circular-progress";
 import "../../../components/ha-markdown";
 import "../../../components/ha-selector/ha-selector";
 import "../../../components/ha-settings-row";
-import "../../../components/ha-textfield";
 import {
   BlueprintAutomationConfig,
   triggerAutomationActions,
@@ -38,8 +38,6 @@ export class HaBlueprintAutomationEditor extends LitElement {
 
   @state() private _blueprints?: Blueprints;
 
-  @state() private _showDescription = false;
-
   protected firstUpdated(changedProps) {
     super.firstUpdated(changedProps);
     this._getBlueprints();
@@ -50,17 +48,6 @@ export class HaBlueprintAutomationEditor extends LitElement {
       return undefined;
     }
     return this._blueprints[this.config.use_blueprint.path];
-  }
-
-  protected willUpdate(changedProps: PropertyValues): void {
-    super.willUpdate(changedProps);
-    if (
-      !this._showDescription &&
-      changedProps.has("config") &&
-      this.config.description
-    ) {
-      this._showDescription = true;
-    }
   }
 
   protected render() {
@@ -75,41 +62,28 @@ export class HaBlueprintAutomationEditor extends LitElement {
             "ui.panel.config.automation.editor.introduction"
           )}
         </span>
-        <ha-card outlined>
+        <ha-card>
           <div class="card-content">
-            <ha-textfield
+            <paper-input
               .label=${this.hass.localize(
                 "ui.panel.config.automation.editor.alias"
               )}
               name="alias"
-              .value=${this.config.alias || ""}
-              @change=${this._valueChanged}
+              .value=${this.config.alias}
+              @value-changed=${this._valueChanged}
             >
-            </ha-textfield>
-            ${this._showDescription
-              ? html`
-                  <ha-textarea
-                    .label=${this.hass.localize(
-                      "ui.panel.config.automation.editor.description.label"
-                    )}
-                    .placeholder=${this.hass.localize(
-                      "ui.panel.config.automation.editor.description.placeholder"
-                    )}
-                    name="description"
-                    autogrow
-                    .value=${this.config.description || ""}
-                    @change=${this._valueChanged}
-                  ></ha-textarea>
-                `
-              : html`
-                  <div class="link-button-row">
-                    <button class="link" @click=${this._addDescription}>
-                      ${this.hass.localize(
-                        "ui.panel.config.automation.editor.description.add"
-                      )}
-                    </button>
-                  </div>
-                `}
+            </paper-input>
+            <paper-textarea
+              .label=${this.hass.localize(
+                "ui.panel.config.automation.editor.description.label"
+              )}
+              .placeholder=${this.hass.localize(
+                "ui.panel.config.automation.editor.description.placeholder"
+              )}
+              name="description"
+              .value=${this.config.description}
+              @value-changed=${this._valueChanged}
+            ></paper-textarea>
           </div>
           ${this.stateObj
             ? html`
@@ -145,7 +119,6 @@ export class HaBlueprintAutomationEditor extends LitElement {
       </ha-config-section>
 
       <ha-card
-        outlined
         class="blueprint"
         .header=${this.hass.localize(
           "ui.panel.config.automation.editor.blueprint.header"
@@ -189,12 +162,7 @@ export class HaBlueprintAutomationEditor extends LitElement {
                     ([key, value]) =>
                       html`<ha-settings-row .narrow=${this.narrow}>
                         <span slot="heading">${value?.name || key}</span>
-                        <ha-markdown
-                          slot="description"
-                          class="card-content"
-                          breaks
-                          .content=${value?.description}
-                        ></ha-markdown>
+                        <span slot="description">${value?.description}</span>
                         ${value?.selector
                           ? html`<ha-selector
                               .hass=${this.hass}
@@ -205,14 +173,15 @@ export class HaBlueprintAutomationEditor extends LitElement {
                               value?.default}
                               @value-changed=${this._inputChanged}
                             ></ha-selector>`
-                          : html`<ha-textfield
+                          : html`<paper-input
                               .key=${key}
                               required
                               .value=${(this.config.use_blueprint.input &&
                                 this.config.use_blueprint.input[key]) ??
                               value?.default}
-                              @input=${this._inputChanged}
-                            ></ha-textfield>`}
+                              @value-changed=${this._inputChanged}
+                              no-label-float
+                            ></paper-input>`}
                       </ha-settings-row>`
                   )
                 : html`<p class="padding">
@@ -252,7 +221,7 @@ export class HaBlueprintAutomationEditor extends LitElement {
     ev.stopPropagation();
     const target = ev.target as any;
     const key = target.key;
-    const value = ev.detail?.value || target.value;
+    const value = ev.detail.value;
     if (
       (this.config.use_blueprint.input &&
         this.config.use_blueprint.input[key] === value) ||
@@ -284,17 +253,13 @@ export class HaBlueprintAutomationEditor extends LitElement {
     if (!name) {
       return;
     }
-    const newVal = target.value;
+    const newVal = ev.detail.value;
     if ((this.config![name] || "") === newVal) {
       return;
     }
     fireEvent(this, "value-changed", {
       value: { ...this.config!, [name]: newVal },
     });
-  }
-
-  private _addDescription() {
-    this._showDescription = true;
   }
 
   static get styles(): CSSResultGroup {
@@ -308,15 +273,8 @@ export class HaBlueprintAutomationEditor extends LitElement {
         .padding {
           padding: 16px;
         }
-        .link-button-row {
-          padding: 14px;
-        }
         .blueprint-picker-container {
           padding: 0 16px 16px;
-        }
-        ha-textarea,
-        ha-textfield {
-          display: block;
         }
         h3 {
           margin: 16px;
@@ -332,9 +290,13 @@ export class HaBlueprintAutomationEditor extends LitElement {
         }
         ha-settings-row {
           --paper-time-input-justify-content: flex-end;
-          --settings-row-content-width: 100%;
-          --settings-row-prefix-display: contents;
           border-top: 1px solid var(--divider-color);
+        }
+        :host(:not([narrow])) ha-settings-row paper-input {
+          width: 60%;
+        }
+        :host(:not([narrow])) ha-settings-row ha-selector {
+          width: 60%;
         }
       `,
     ];

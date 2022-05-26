@@ -28,7 +28,6 @@ import {
   computeMediaControls,
   computeMediaDescription,
   getCurrentProgress,
-  handleMediaControlClick,
   MediaPickedEvent,
   MediaPlayerEntity,
   SUPPORT_BROWSE_MEDIA,
@@ -175,7 +174,7 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
       UNAVAILABLE_STATES.includes(entityState) ||
       (entityState === "off" && !supportsFeature(stateObj, SUPPORT_TURN_ON));
     const hasNoImage = !this._image;
-    const controls = computeMediaControls(stateObj, false);
+    const controls = computeMediaControls(stateObj);
     const showControls =
       controls &&
       (!this._veryNarrow ||
@@ -505,11 +504,10 @@ export class HuiMediaControlCard extends LitElement implements LovelaceCard {
   }
 
   private _handleClick(e: MouseEvent): void {
-    handleMediaControlClick(
-      this.hass!,
-      this._stateObj!,
-      (e.currentTarget as HTMLElement).getAttribute("action")!
-    );
+    const action = (e.currentTarget! as HTMLElement).getAttribute("action")!;
+    this.hass!.callService("media_player", action, {
+      entity_id: this._config!.entity,
+    });
   }
 
   private _updateProgressBar(): void {

@@ -1,14 +1,13 @@
 import "@material/mwc-list/mwc-list-item";
+import "@material/mwc-select/mwc-select";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { property, state } from "lit/decorators";
 import { fireEvent } from "../../common/dom/fire_event";
 import {
   DeviceAutomation,
   deviceAutomationsEqual,
-  sortDeviceAutomations,
 } from "../../data/device_automation";
 import { HomeAssistant } from "../../types";
-import "../ha-select";
 
 const NO_AUTOMATION_KEY = "NO_AUTOMATION";
 const UNKNOWN_AUTOMATION_KEY = "UNKNOWN_AUTOMATION";
@@ -91,7 +90,7 @@ export abstract class HaDeviceAutomationPicker<
     }
     const value = this._value;
     return html`
-      <ha-select
+      <mwc-select
         .label=${this.label}
         .value=${value}
         @selected=${this._automationChanged}
@@ -114,7 +113,7 @@ export abstract class HaDeviceAutomationPicker<
             </mwc-list-item>
           `
         )}
-      </ha-select>
+      </mwc-select>
     `;
   }
 
@@ -128,9 +127,7 @@ export abstract class HaDeviceAutomationPicker<
 
   private async _updateDeviceInfo() {
     this._automations = this.deviceId
-      ? (await this._fetchDeviceAutomations(this.hass, this.deviceId)).sort(
-          sortDeviceAutomations
-        )
+      ? await this._fetchDeviceAutomations(this.hass, this.deviceId)
       : // No device, clear the list of automations
         [];
 
@@ -164,14 +161,13 @@ export abstract class HaDeviceAutomationPicker<
     if (this.value && deviceAutomationsEqual(automation, this.value)) {
       return;
     }
-    const value = { ...automation };
-    delete value.metadata;
-    fireEvent(this, "value-changed", { value });
+    fireEvent(this, "change");
+    fireEvent(this, "value-changed", { value: automation });
   }
 
   static get styles(): CSSResultGroup {
     return css`
-      ha-select {
+      mwc-select {
         width: 100%;
         margin-top: 4px;
       }

@@ -1,4 +1,5 @@
 import { html } from "lit";
+import { caseInsensitiveStringCompare } from "../../common/string/compare";
 import {
   createConfigFlow,
   deleteConfigFlow,
@@ -22,12 +23,17 @@ export const showConfigFlowDialog = (
   showFlowDialog(element, dialogParams, {
     loadDevicesAndAreas: true,
     getFlowHandlers: async (hass) => {
-      const [integrations, helpers] = await Promise.all([
-        getConfigFlowHandlers(hass, "integration"),
-        getConfigFlowHandlers(hass, "helper"),
+      const [handlers] = await Promise.all([
+        getConfigFlowHandlers(hass),
         hass.loadBackendTranslation("title", undefined, true),
       ]);
-      return { integrations, helpers };
+
+      return handlers.sort((handlerA, handlerB) =>
+        caseInsensitiveStringCompare(
+          domainToName(hass.localize, handlerA),
+          domainToName(hass.localize, handlerB)
+        )
+      );
     },
     createFlow: async (hass, handler) => {
       const [step] = await Promise.all([
@@ -82,12 +88,6 @@ export const showConfigFlowDialog = (
     renderShowFormStepFieldLabel(hass, step, field) {
       return hass.localize(
         `component.${step.handler}.config.step.${step.step_id}.data.${field.name}`
-      );
-    },
-
-    renderShowFormStepFieldHelper(hass, step, field) {
-      return hass.localize(
-        `component.${step.handler}.config.step.${step.step_id}.data_description.${field.name}`
       );
     },
 
@@ -179,33 +179,6 @@ export const showConfigFlowDialog = (
             <ha-markdown allowsvg breaks .content=${description}></ha-markdown>
           `
         : "";
-    },
-
-    renderMenuHeader(hass, step) {
-      return (
-        hass.localize(
-          `component.${step.handler}.config.step.${step.step_id}.title`
-        ) || hass.localize(`component.${step.handler}.title`)
-      );
-    },
-
-    renderMenuDescription(hass, step) {
-      const description = hass.localize(
-        `component.${step.handler}.config.step.${step.step_id}.description`,
-        step.description_placeholders
-      );
-      return description
-        ? html`
-            <ha-markdown allowsvg breaks .content=${description}></ha-markdown>
-          `
-        : "";
-    },
-
-    renderMenuOption(hass, step, option) {
-      return hass.localize(
-        `component.${step.handler}.config.step.${step.step_id}.menu_options.${option}`,
-        step.description_placeholders
-      );
     },
 
     renderLoadingDescription(hass, reason, handler, step) {

@@ -1,6 +1,7 @@
 /* eslint-disable lit/prefer-static-styles */
-import "@material/mwc-button/mwc-button";
 import { mdiMicrophone } from "@mdi/js";
+import "@polymer/paper-input/paper-input";
+import type { PaperInputElement } from "@polymer/paper-input/paper-input";
 import {
   css,
   CSSResultGroup,
@@ -9,16 +10,12 @@ import {
   PropertyValues,
   TemplateResult,
 } from "lit";
-import { customElement, property, query, state } from "lit/decorators";
+import { customElement, property, state, query } from "lit/decorators";
 import { classMap } from "lit/directives/class-map";
 import { fireEvent } from "../../common/dom/fire_event";
 import { SpeechRecognition } from "../../common/dom/speech-recognition";
 import { uid } from "../../common/util/uid";
-import "../../components/ha-dialog";
-import type { HaDialog } from "../../components/ha-dialog";
 import "../../components/ha-icon-button";
-import "../../components/ha-textfield";
-import type { HaTextField } from "../../components/ha-textfield";
 import {
   AgentInfo,
   getAgentInfo,
@@ -27,6 +24,9 @@ import {
 } from "../../data/conversation";
 import { haStyleDialog } from "../../resources/styles";
 import type { HomeAssistant } from "../../types";
+import "../../components/ha-dialog";
+import type { HaDialog } from "../../components/ha-dialog";
+import "@material/mwc-button/mwc-button";
 
 interface Message {
   who: string;
@@ -127,19 +127,18 @@ export class HaVoiceCommandDialog extends LitElement {
             : ""}
         </div>
         <div class="input" slot="primaryAction">
-          <ha-textfield
+          <paper-input
             @keyup=${this._handleKeyUp}
             .label=${this.hass.localize(
               `ui.dialogs.voice_command.${
                 SpeechRecognition ? "label_voice" : "label"
               }`
             )}
-            dialogInitialFocus
-            iconTrailing
+            autofocus
           >
             ${SpeechRecognition
               ? html`
-                  <span slot="trailingIcon">
+                  <span suffix="" slot="suffix">
                     ${this.results
                       ? html`
                           <div class="bouncer">
@@ -156,7 +155,7 @@ export class HaVoiceCommandDialog extends LitElement {
                   </span>
                 `
               : ""}
-          </ha-textfield>
+          </paper-input>
           ${this._agentInfo && this._agentInfo.attribution
             ? html`
                 <a
@@ -196,7 +195,7 @@ export class HaVoiceCommandDialog extends LitElement {
   }
 
   private _handleKeyUp(ev: KeyboardEvent) {
-    const input = ev.target as HaTextField;
+    const input = ev.target as PaperInputElement;
     if (ev.keyCode === 13 && input.value) {
       this._processText(input.value);
       input.value = "";
@@ -328,7 +327,6 @@ export class HaVoiceCommandDialog extends LitElement {
       css`
         ha-icon-button {
           color: var(--secondary-text-color);
-          margin-right: -24px;
         }
 
         ha-icon-button[active] {
@@ -340,9 +338,7 @@ export class HaVoiceCommandDialog extends LitElement {
           --secondary-action-button-flex: 0;
           --mdc-dialog-max-width: 450px;
         }
-        ha-textfield {
-          display: block;
-        }
+
         a.button {
           text-decoration: none;
         }
@@ -410,6 +406,7 @@ export class HaVoiceCommandDialog extends LitElement {
           width: 48px;
           height: 48px;
           position: absolute;
+          top: 0;
         }
         .double-bounce1,
         .double-bounce2 {

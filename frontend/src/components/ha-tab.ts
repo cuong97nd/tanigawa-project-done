@@ -42,7 +42,9 @@ export class HaTab extends LitElement {
         @keydown=${this._handleKeyDown}
       >
         ${this.narrow ? html`<slot name="icon"></slot>` : ""}
-        <span class="name">${this.name}</span>
+        ${!this.narrow || this.active
+          ? html`<span class="name">${this.name}</span>`
+          : ""}
         ${this._shouldRenderRipple ? html`<mwc-ripple></mwc-ripple>` : ""}
       </div>
     `;

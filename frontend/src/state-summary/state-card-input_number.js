@@ -30,8 +30,7 @@ class StateCardInputNumber extends mixinBehaviors(
         .sliderstate {
           min-width: 45px;
         }
-        ha-slider[hidden],
-        ha-textfield[hidden] {
+        ha-slider[hidden] {
           display: none !important;
         }
         ha-textfield {

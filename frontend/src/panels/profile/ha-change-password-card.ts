@@ -1,4 +1,5 @@
 import "@material/mwc-button";
+import "@polymer/paper-input/paper-input";
 import {
   css,
   CSSResultGroup,
@@ -10,10 +11,8 @@ import {
 import { customElement, property, state } from "lit/decorators";
 import "../../components/ha-card";
 import "../../components/ha-circular-progress";
-import "../../components/ha-textfield";
 import { haStyle } from "../../resources/styles";
 import type { HomeAssistant } from "../../types";
-import "../../components/ha-alert";
 
 @customElement("ha-change-password-card")
 class HaChangePasswordCard extends LitElement {
@@ -25,11 +24,11 @@ class HaChangePasswordCard extends LitElement {
 
   @state() private _errorMsg?: string;
 
-  @state() private _currentPassword = "";
+  @state() private _currentPassword?: string;
 
-  @state() private _password = "";
+  @state() private _password?: string;
 
-  @state() private _passwordConfirm = "";
+  @state() private _passwordConfirm?: string;
 
   protected render(): TemplateResult {
     return html`
@@ -41,48 +40,46 @@ class HaChangePasswordCard extends LitElement {
         >
           <div class="card-content">
             ${this._errorMsg
-              ? html`<ha-alert alert-type="error">${this._errorMsg}</ha-alert>`
+              ? html` <div class="error">${this._errorMsg}</div> `
               : ""}
             ${this._statusMsg
-              ? html`<ha-alert alert-type="success"
-                  >${this._statusMsg}</ha-alert
-                >`
+              ? html` <div class="status">${this._statusMsg}</div> `
               : ""}
 
-            <ha-textfield
+            <paper-input
               id="currentPassword"
               .label=${this.hass.localize(
                 "ui.panel.profile.change_password.current_password"
               )}
               type="password"
               .value=${this._currentPassword}
-              @input=${this._currentPasswordChanged}
+              @value-changed=${this._currentPasswordChanged}
               required
-            ></ha-textfield>
+            ></paper-input>
 
             ${this._currentPassword
-              ? html`<ha-textfield
+              ? html` <paper-input
                     .label=${this.hass.localize(
                       "ui.panel.profile.change_password.new_password"
                     )}
                     name="password"
                     type="password"
                     .value=${this._password}
-                    @change=${this._newPasswordChanged}
+                    @value-changed=${this._newPasswordChanged}
                     required
                     auto-validate
-                  ></ha-textfield>
-                  <ha-textfield
+                  ></paper-input>
+                  <paper-input
                     .label=${this.hass.localize(
                       "ui.panel.profile.change_password.confirm_new_password"
                     )}
                     name="passwordConfirm"
                     type="password"
                     .value=${this._passwordConfirm}
-                    @input=${this._newPasswordConfirmChanged}
+                    @value-changed=${this._newPasswordConfirmChanged}
                     required
                     auto-validate
-                  ></ha-textfield>`
+                  ></paper-input>`
               : ""}
           </div>
 
@@ -104,16 +101,16 @@ class HaChangePasswordCard extends LitElement {
     `;
   }
 
-  private _currentPasswordChanged(ev) {
-    this._currentPassword = ev.target.value;
+  private _currentPasswordChanged(ev: CustomEvent) {
+    this._currentPassword = ev.detail.value;
   }
 
-  private _newPasswordChanged(ev) {
-    this._password = ev.target.value;
+  private _newPasswordChanged(ev: CustomEvent) {
+    this._password = ev.detail.value;
   }
 
-  private _newPasswordConfirmChanged(ev) {
-    this._passwordConfirm = ev.target.value;
+  private _newPasswordConfirmChanged(ev: CustomEvent) {
+    this._passwordConfirm = ev.detail.value;
   }
 
   protected firstUpdated(changedProps: PropertyValues) {
@@ -165,21 +162,23 @@ class HaChangePasswordCard extends LitElement {
     this._statusMsg = this.hass.localize(
       "ui.panel.profile.change_password.success"
     );
-    this._currentPassword = "";
-    this._password = "";
-    this._passwordConfirm = "";
+    this._currentPassword = undefined;
+    this._password = undefined;
+    this._passwordConfirm = undefined;
   }
 
   static get styles(): CSSResultGroup {
     return [
       haStyle,
       css`
-        ha-textfield {
-          margin-top: 8px;
-          display: block;
+        .error {
+          color: var(--error-color);
+        }
+        .status {
+          color: var(--primary-color);
         }
         #currentPassword {
-          margin-top: 0;
+          margin-top: -8px;
         }
       `,
     ];

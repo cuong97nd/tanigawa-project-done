@@ -12,7 +12,7 @@ export const isNavigationClick = (e: MouseEvent) => {
 
   const anchor = e
     .composedPath()
-    .find((n) => (n as HTMLElement).tagName === "A") as
+    .filter((n) => (n as HTMLElement).tagName === "A")[0] as
     | HTMLAnchorElement
     | undefined;
   if (

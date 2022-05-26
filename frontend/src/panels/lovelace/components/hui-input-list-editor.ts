@@ -1,11 +1,11 @@
 import { mdiClose } from "@mdi/js";
+import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import { fireEvent } from "../../../common/dom/fire_event";
 import "../../../components/ha-icon-button";
 import { HomeAssistant } from "../../../types";
 import { EditorTarget } from "../editor/types";
-import "../../../components/ha-textfield";
 
 @customElement("hui-input-list-editor")
 export class HuiInputListEditor extends LitElement {
@@ -23,31 +23,30 @@ export class HuiInputListEditor extends LitElement {
     return html`
       ${this.value.map(
         (listEntry, index) => html`
-          <ha-textfield
-            .label=${this.inputLabel}
+          <paper-input
+            label=${this.inputLabel}
             .value=${listEntry}
             .configValue=${"entry"}
             .index=${index}
-            @input=${this._valueChanged}
+            @value-changed=${this._valueChanged}
             @blur=${this._consolidateEntries}
             @keydown=${this._handleKeyDown}
-            iconTrailing
             ><ha-icon-button
-              slot="trailingIcon"
+              slot="suffix"
               class="clear-button"
               .path=${mdiClose}
               no-ripple
               @click=${this._removeEntry}
               .label=${this.hass!.localize("ui.common.clear")}
-            >
-            </ha-icon-button>
-          </ha-textfield>
+              >Clear</ha-icon-button
+            ></paper-input
+          >
         `
       )}
-      <ha-textfield
-        .label=${this.inputLabel}
+      <paper-input
+        label=${this.inputLabel}
         @change=${this._addEntry}
-      ></ha-textfield>
+      ></paper-input>
     `;
   }
 
@@ -104,11 +103,9 @@ export class HuiInputListEditor extends LitElement {
   static get styles(): CSSResultGroup {
     return css`
       ha-icon-button {
-        margin-right: -24px;
+        --mdc-icon-button-size: 24px;
+        padding: 2px;
         color: var(--secondary-text-color);
-      }
-      ha-textfield {
-        display: block;
       }
     `;
   }

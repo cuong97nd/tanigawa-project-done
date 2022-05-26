@@ -12,6 +12,13 @@ export const lovelaceTabs = [
     translationKey: "ui.panel.config.lovelace.dashboards.caption",
     icon: "hass:view-dashboard",
   },
+  {
+    component: "lovelace",
+    path: "/config/lovelace/resources",
+    translationKey: "ui.panel.config.lovelace.resources.caption",
+    icon: "hass:file-multiple",
+    advancedOnly: true,
+  },
 ];
 
 @customElement("ha-config-lovelace")

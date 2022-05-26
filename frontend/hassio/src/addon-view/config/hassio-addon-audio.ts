@@ -1,4 +1,5 @@
 import "@material/mwc-button";
+import "@material/mwc-select";
 import "@material/mwc-list/mwc-list-item";
 import {
   css,
@@ -13,7 +14,6 @@ import { stopPropagation } from "../../../../src/common/dom/stop_propagation";
 import "../../../../src/components/buttons/ha-progress-button";
 import "../../../../src/components/ha-alert";
 import "../../../../src/components/ha-card";
-import "../../../../src/components/ha-select";
 import {
   HassioAddonDetails,
   HassioAddonSetOptionParams,
@@ -50,7 +50,6 @@ class HassioAddonAudio extends LitElement {
   protected render(): TemplateResult {
     return html`
       <ha-card
-        outlined
         .header=${this.supervisor.localize("addon.configuration.audio.header")}
       >
         <div class="card-content">
@@ -58,7 +57,7 @@ class HassioAddonAudio extends LitElement {
             ? html`<ha-alert alert-type="error">${this._error}</ha-alert>`
             : ""}
           ${this._inputDevices &&
-          html`<ha-select
+          html`<mwc-select
             .label=${this.supervisor.localize(
               "addon.configuration.audio.input"
             )}
@@ -75,9 +74,9 @@ class HassioAddonAudio extends LitElement {
                 </mwc-list-item>
               `
             )}
-          </ha-select>`}
+          </mwc-select>`}
           ${this._outputDevices &&
-          html`<ha-select
+          html`<mwc-select
             .label=${this.supervisor.localize(
               "addon.configuration.audio.output"
             )}
@@ -94,7 +93,7 @@ class HassioAddonAudio extends LitElement {
                 >
               `
             )}
-          </ha-select>`}
+          </mwc-select>`}
         </div>
         <div class="card-actions">
           <ha-progress-button @click=${this._saveSettings}>
@@ -120,10 +119,10 @@ class HassioAddonAudio extends LitElement {
         .card-actions {
           text-align: right;
         }
-        ha-select {
+        mwc-select {
           width: 100%;
         }
-        ha-select:last-child {
+        mwc-select:last-child {
           margin-top: 8px;
         }
       `,

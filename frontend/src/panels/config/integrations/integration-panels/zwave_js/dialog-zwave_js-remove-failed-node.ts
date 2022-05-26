@@ -18,7 +18,9 @@ import { ZWaveJSRemoveFailedNodeDialogParams } from "./show-dialog-zwave_js-remo
 class DialogZWaveJSRemoveFailedNode extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @state() private device_id?: string;
+  @state() private entry_id?: string;
+
+  @state() private node_id?: number;
 
   @state() private _status = "";
 
@@ -36,12 +38,13 @@ class DialogZWaveJSRemoveFailedNode extends LitElement {
   public async showDialog(
     params: ZWaveJSRemoveFailedNodeDialogParams
   ): Promise<void> {
-    this.device_id = params.device_id;
+    this.entry_id = params.entry_id;
+    this.node_id = params.node_id;
   }
 
   public closeDialog(): void {
     this._unsubscribe();
-    this.device_id = undefined;
+    this.entry_id = undefined;
     this._status = "";
 
     fireEvent(this, "dialog-closed", { dialog: this.localName });
@@ -53,7 +56,7 @@ class DialogZWaveJSRemoveFailedNode extends LitElement {
   }
 
   protected render(): TemplateResult {
-    if (!this.device_id) {
+    if (!this.entry_id || !this.node_id) {
       return html``;
     }
 
@@ -163,7 +166,8 @@ class DialogZWaveJSRemoveFailedNode extends LitElement {
     this._status = "started";
     this._subscribed = removeFailedZwaveNode(
       this.hass,
-      this.device_id!,
+      this.entry_id!,
+      this.node_id!,
       (message: any) => this._handleMessage(message)
     ).catch((error) => {
       this._status = "failed";

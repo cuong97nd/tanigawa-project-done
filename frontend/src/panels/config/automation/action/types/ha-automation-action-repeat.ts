@@ -1,3 +1,4 @@
+import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators";
 import { fireEvent } from "../../../../../common/dom/fire_event";
@@ -9,11 +10,10 @@ import {
   WhileRepeat,
 } from "../../../../../data/script";
 import { haStyle } from "../../../../../resources/styles";
-import type { HomeAssistant } from "../../../../../types";
-import type { Condition } from "../../../../lovelace/common/validate-condition";
+import { HomeAssistant } from "../../../../../types";
+import { Condition } from "../../../../lovelace/common/validate-condition";
 import "../ha-automation-action";
-import "../../../../../components/ha-textfield";
-import type { ActionElement } from "../ha-automation-action-row";
+import { ActionElement } from "../ha-automation-action-row";
 
 const OPTIONS = ["count", "while", "until"];
 
@@ -35,7 +35,7 @@ export class HaRepeatAction extends LitElement implements ActionElement {
     const type = getType(action);
 
     return html`
-      <ha-select
+      <mwc-select
         .label=${this.hass.localize(
           "ui.panel.config.automation.editor.actions.type.repeat.type_select"
         )}
@@ -51,18 +51,16 @@ export class HaRepeatAction extends LitElement implements ActionElement {
             </mwc-list-item>
           `
         )}
-      </ha-select>
+      </mwc-select>
       ${type === "count"
-        ? html`
-            <ha-textfield
-              .label=${this.hass.localize(
-                "ui.panel.config.automation.editor.actions.type.repeat.type.count.label"
-              )}
-              name="count"
-              .value=${(action as CountRepeat).count || "0"}
-              @change=${this._countChanged}
-            ></ha-textfield>
-          `
+        ? html`<paper-input
+            .label=${this.hass.localize(
+              "ui.panel.config.automation.editor.actions.type.repeat.type.count.label"
+            )}
+            name="count"
+            .value=${(action as CountRepeat).count || "0"}
+            @value-changed=${this._countChanged}
+          ></paper-input>`
         : ""}
       ${type === "while"
         ? html` <h3>
@@ -144,7 +142,7 @@ export class HaRepeatAction extends LitElement implements ActionElement {
   }
 
   private _countChanged(ev: CustomEvent): void {
-    const newVal = (ev.target as any).value;
+    const newVal = ev.detail.value;
     if ((this.action.repeat as CountRepeat).count === newVal) {
       return;
     }
@@ -162,8 +160,8 @@ export class HaRepeatAction extends LitElement implements ActionElement {
     return [
       haStyle,
       css`
-        ha-textfield {
-          margin-top: 16px;
+        mwc-select {
+          margin-top: 8px;
         }
       `,
     ];

@@ -136,9 +136,10 @@ export class HaScriptEditor extends KeyboardShortcutMixin(LitElement) {
       if (currentMode && MODES_MAX.includes(currentMode)) {
         schema.push({
           name: "max",
-          required: true,
           selector: {
-            number: { mode: "box", min: 1, max: Infinity },
+            text: {
+              type: "number",
+            },
           },
         });
       }
@@ -160,11 +161,11 @@ export class HaScriptEditor extends KeyboardShortcutMixin(LitElement) {
 
     const data = {
       mode: MODES[0],
-      icon: undefined,
       max:
         this._config.mode && MODES_MAX.includes(this._config.mode)
           ? 10
           : undefined,
+      icon: undefined,
       ...this._config,
       id: this._entityId,
     };
@@ -290,7 +291,7 @@ export class HaScriptEditor extends KeyboardShortcutMixin(LitElement) {
                               "ui.panel.config.script.editor.introduction"
                             )}
                           </span>
-                          <ha-card outlined>
+                          <ha-card>
                             <div class="card-content">
                               <ha-form
                                 .schema=${schema}
@@ -387,8 +388,8 @@ export class HaScriptEditor extends KeyboardShortcutMixin(LitElement) {
             ? html`
                 ${!this.narrow
                   ? html`
-                      <ha-card outlined>
-                        <div class="card-header">${this._config?.alias}</div>
+                      <ha-card
+                        ><div class="card-header">${this._config?.alias}</div>
                         <div
                           class="card-actions layout horizontal justified center"
                         >
@@ -412,8 +413,8 @@ export class HaScriptEditor extends KeyboardShortcutMixin(LitElement) {
                   .defaultValue=${this._preprocessYaml()}
                   @value-changed=${this._yamlChanged}
                 ></ha-yaml-editor>
-                <ha-card outlined>
-                  <div class="card-actions">
+                <ha-card
+                  ><div class="card-actions">
                     <mwc-button @click=${this._copyYaml}>
                       ${this.hass.localize(
                         "ui.panel.config.automation.editor.copy_to_clipboard"
@@ -569,13 +570,9 @@ export class HaScriptEditor extends KeyboardShortcutMixin(LitElement) {
   }
 
   private _aliasChanged(alias: string) {
-    if (
-      this.scriptEntityId ||
-      (this._entityId && this._entityId !== slugify(this._config!.alias))
-    ) {
+    if (this.scriptEntityId || this._entityId) {
       return;
     }
-
     const aliasSlugify = slugify(alias);
     let id = aliasSlugify;
     let i = 2;
@@ -599,7 +596,6 @@ export class HaScriptEditor extends KeyboardShortcutMixin(LitElement) {
   private _valueChanged(ev: CustomEvent) {
     ev.stopPropagation();
     const values = ev.detail.value as any;
-    const currentId = this._entityId;
 
     for (const key of Object.keys(values)) {
       if (key === "sequence") {
@@ -608,10 +604,7 @@ export class HaScriptEditor extends KeyboardShortcutMixin(LitElement) {
 
       const value = values[key];
 
-      if (
-        value === this._config![key] ||
-        (key === "id" && currentId === value)
-      ) {
+      if (value === this._config![key]) {
         continue;
       }
 

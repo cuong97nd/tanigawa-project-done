@@ -87,7 +87,6 @@ export interface ButtonCardConfig extends LovelaceCardConfig {
   name?: string;
   show_name?: boolean;
   icon?: string;
-  icon_height?: string;
   show_icon?: boolean;
   theme?: string;
   tap_action?: ActionConfig;
@@ -95,10 +94,6 @@ export interface ButtonCardConfig extends LovelaceCardConfig {
   double_tap_action?: ActionConfig;
   state_color?: boolean;
   show_state?: boolean;
-}
-
-export interface EnergyCardBaseConfig extends LovelaceCardConfig {
-  collection_key?: string;
 }
 
 export interface EnergySummaryCardConfig extends LovelaceCardConfig {
@@ -180,11 +175,6 @@ export interface SeverityConfig {
   red?: number;
 }
 
-export interface GaugeSegment {
-  from: number;
-  color: string;
-}
-
 export interface GaugeCardConfig extends LovelaceCardConfig {
   entity: string;
   name?: string;
@@ -194,7 +184,6 @@ export interface GaugeCardConfig extends LovelaceCardConfig {
   severity?: SeverityConfig;
   theme?: string;
   needle?: boolean;
-  segments?: GaugeSegment[];
 }
 
 export interface ConfigEntity extends EntityConfig {

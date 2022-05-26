@@ -43,7 +43,7 @@ class HaWebRtcPlayer extends LitElement {
 
   private _remoteStream?: MediaStream;
 
-  protected override render(): TemplateResult {
+  protected render(): TemplateResult {
     if (this._error) {
       return html`<ha-alert alert-type="error">${this._error}</ha-alert>`;
     }
@@ -58,19 +58,12 @@ class HaWebRtcPlayer extends LitElement {
     `;
   }
 
-  public override connectedCallback() {
-    super.connectedCallback();
-    if (this.hasUpdated) {
-      this._startWebRtc();
-    }
-  }
-
-  public override disconnectedCallback() {
+  public disconnectedCallback() {
     super.disconnectedCallback();
     this._cleanUp();
   }
 
-  protected override updated(changedProperties: PropertyValues<this>) {
+  protected updated(changedProperties: PropertyValues<this>) {
     if (!changedProperties.has("entityid")) {
       return;
     }

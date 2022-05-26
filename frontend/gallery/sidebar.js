@@ -37,16 +37,11 @@ module.exports = [
     header: "Miscelaneous",
   },
   {
-    category: "brand",
-    header: "Brand",
-  },
-  {
     category: "user-test",
-    header: "Users",
-    pages: ["user-types", "configuration-menu"],
+    header: "User Tests",
   },
   {
     category: "design.home-assistant.io",
-    header: "About",
+    header: "Design Documentation",
   },
 ];

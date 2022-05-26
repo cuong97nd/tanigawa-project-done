@@ -28,7 +28,7 @@ export interface DataEntryFlowStepForm {
   step_id: string;
   data_schema: HaFormSchema[];
   errors: Record<string, string>;
-  description_placeholders?: Record<string, string>;
+  description_placeholders: Record<string, string>;
   last_step: boolean | null;
 }
 
@@ -49,7 +49,7 @@ export interface DataEntryFlowStepCreateEntry {
   title: string;
   result?: ConfigEntry;
   description: string;
-  description_placeholders?: Record<string, string>;
+  description_placeholders: Record<string, string>;
 }
 
 export interface DataEntryFlowStepAbort {
@@ -57,7 +57,7 @@ export interface DataEntryFlowStepAbort {
   flow_id: string;
   handler: string;
   reason: string;
-  description_placeholders?: Record<string, string>;
+  description_placeholders: Record<string, string>;
 }
 
 export interface DataEntryFlowStepProgress {
@@ -66,17 +66,7 @@ export interface DataEntryFlowStepProgress {
   handler: string;
   step_id: string;
   progress_action: string;
-  description_placeholders?: Record<string, string>;
-}
-
-export interface DataEntryFlowStepMenu {
-  type: "menu";
-  flow_id: string;
-  handler: string;
-  step_id: string;
-  /** If array, use value to lookup translations in strings.json */
-  menu_options: string[] | Record<string, string>;
-  description_placeholders?: Record<string, string>;
+  description_placeholders: Record<string, string>;
 }
 
 export type DataEntryFlowStep =
@@ -84,8 +74,7 @@ export type DataEntryFlowStep =
   | DataEntryFlowStepExternal
   | DataEntryFlowStepCreateEntry
   | DataEntryFlowStepAbort
-  | DataEntryFlowStepProgress
-  | DataEntryFlowStepMenu;
+  | DataEntryFlowStepProgress;
 
 export const subscribeDataEntryFlowProgressed = (
   conn: Connection,

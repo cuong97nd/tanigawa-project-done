@@ -9,12 +9,6 @@ export class HaTextField extends TextFieldBase {
 
   @property({ attribute: "error-message" }) public errorMessage?: string;
 
-  // @ts-ignore
-  @property({ type: Boolean }) public icon?: boolean;
-
-  // @ts-ignore
-  @property({ type: Boolean }) public iconTrailing?: boolean;
-
   override updated(changedProperties: PropertyValues) {
     super.updated(changedProperties);
     if (
@@ -59,15 +53,6 @@ export class HaTextField extends TextFieldBase {
         padding-right: var(--text-field-suffix-padding-right, 0px);
       }
 
-      .mdc-text-field:not(.mdc-text-field--disabled)
-        .mdc-text-field__affix--suffix {
-        color: var(--secondary-text-color);
-      }
-
-      .mdc-text-field__icon {
-        color: var(--secondary-text-color);
-      }
-
       input {
         text-align: var(--text-field-text-align);
       }
@@ -90,20 +75,6 @@ export class HaTextField extends TextFieldBase {
 
       .mdc-text-field {
         overflow: var(--text-field-overflow);
-      }
-
-      .mdc-floating-label {
-        inset-inline-start: 16px !important;
-        inset-inline-end: initial !important;
-        direction: var(--direction);
-      }
-
-      .mdc-text-field--with-leading-icon.mdc-text-field--filled
-        .mdc-floating-label {
-        max-width: calc(100% - 48px);
-        inset-inline-start: 48px !important;
-        inset-inline-end: initial !important;
-        direction: var(--direction);
       }
     `,
   ];

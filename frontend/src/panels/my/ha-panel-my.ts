@@ -12,10 +12,7 @@ import "../../layouts/hass-error-screen";
 import { HomeAssistant, Route } from "../../types";
 import { documentationUrl } from "../../util/documentation-url";
 
-export const getMyRedirects = (hasSupervisor: boolean): Redirects => ({
-  application_credentials: {
-    redirect: "/config/application_credentials",
-  },
+const REDIRECTS: Redirects = {
   developer_states: {
     redirect: "/developer-tools/state",
   },
@@ -37,24 +34,21 @@ export const getMyRedirects = (hasSupervisor: boolean): Redirects => ({
   developer_statistics: {
     redirect: "/developer-tools/statistics",
   },
-  server_controls: {
-    redirect: "/developer-tools/yaml",
-  },
   config: {
-    redirect: "/config/dashboard",
+    redirect: "/config",
   },
   cloud: {
     component: "cloud",
     redirect: "/config/cloud",
+  },
+  integrations: {
+    redirect: "/config/integrations",
   },
   config_flow_start: {
     redirect: "/config/integrations/add",
     params: {
       domain: "string",
     },
-  },
-  integrations: {
-    redirect: "/config/integrations",
   },
   config_mqtt: {
     component: "mqtt",
@@ -85,16 +79,16 @@ export const getMyRedirects = (hasSupervisor: boolean): Redirects => ({
   areas: {
     redirect: "/config/areas/dashboard",
   },
+  blueprints: {
+    component: "blueprint",
+    redirect: "/config/blueprint/dashboard",
+  },
   blueprint_import: {
     component: "blueprint",
     redirect: "/config/blueprint/dashboard/import",
     params: {
       blueprint_url: "url",
     },
-  },
-  blueprints: {
-    component: "blueprint",
-    redirect: "/config/blueprint/dashboard",
   },
   automations: {
     component: "automation",
@@ -123,15 +117,6 @@ export const getMyRedirects = (hasSupervisor: boolean): Redirects => ({
     component: "lovelace",
     redirect: "/config/lovelace/resources",
   },
-  oauth2_authorize_callback: {
-    redirect: "/auth/external/callback",
-    navigate_outside_spa: true,
-    params: {
-      error: "string?",
-      code: "string?",
-      state: "string",
-    },
-  },
   people: {
     component: "person",
     redirect: "/config/person",
@@ -144,7 +129,10 @@ export const getMyRedirects = (hasSupervisor: boolean): Redirects => ({
     redirect: "/config/users",
   },
   general: {
-    redirect: "/config/general",
+    redirect: "/config/core",
+  },
+  server_controls: {
+    redirect: "/config/server_control",
   },
   logs: {
     redirect: "/config/logs",
@@ -152,33 +140,12 @@ export const getMyRedirects = (hasSupervisor: boolean): Redirects => ({
   info: {
     redirect: "/config/info",
   },
-  system_health: {
-    redirect: "/config/system_health",
-  },
-  hardware: {
-    redirect: "/config/hardware",
-  },
-  storage: {
-    redirect: "/config/storage",
-  },
-  network: {
-    redirect: "/config/network",
-  },
-  analytics: {
-    redirect: "/config/analytics",
-  },
-  updates: {
-    redirect: "/config/updates",
-  },
-  system_dashboard: {
-    redirect: "/config/system",
-  },
   customize: {
     // customize was removed in 2021.12, fallback to dashboard
     redirect: "/config/dashboard",
   },
   profile: {
-    redirect: "/profile",
+    redirect: "/profile/dashboard",
   },
   logbook: {
     component: "logbook",
@@ -188,53 +155,15 @@ export const getMyRedirects = (hasSupervisor: boolean): Redirects => ({
     component: "history",
     redirect: "/history",
   },
-  media_browser: {
-    component: "media_source",
-    redirect: "/media-browser",
-  },
-  backup: {
-    component: hasSupervisor ? "hassio" : "backup",
-    redirect: hasSupervisor ? "/hassio/backups" : "/config/backup",
-  },
-  supervisor_snapshots: {
-    component: hasSupervisor ? "hassio" : "backup",
-    redirect: hasSupervisor ? "/hassio/backups" : "/config/backup",
-  },
-  supervisor_backups: {
-    component: hasSupervisor ? "hassio" : "backup",
-    redirect: hasSupervisor ? "/hassio/backups" : "/config/backup",
-  },
-  supervisor_system: {
-    // Moved from Supervisor panel in 2022.5
-    redirect: "/config/system",
-  },
-  supervisor_logs: {
-    // Moved from Supervisor panel in 2022.5
-    redirect: "/config/logs",
-  },
-  supervisor_info: {
-    // Moved from Supervisor panel in 2022.5
-    redirect: "/config/info",
-  },
-});
+};
 
-const getRedirect = (
-  path: string,
-  hasSupervisor: boolean
-): Redirect | undefined => getMyRedirects(hasSupervisor)?.[path];
-
-export type ParamType = "url" | "string" | "string?";
+export type ParamType = "url" | "string";
 
 export type Redirects = { [key: string]: Redirect };
 export interface Redirect {
   redirect: string;
-  // Set to True to use browser redirect instead of frontend navigation
-  navigate_outside_spa?: boolean;
   component?: string;
   params?: {
-    [key: string]: ParamType;
-  };
-  optional_params?: {
     [key: string]: ParamType;
   };
 }
@@ -247,17 +176,12 @@ class HaPanelMy extends LitElement {
 
   @state() public _error?: string;
 
-  private _redirect?: Redirect;
-
   connectedCallback() {
     super.connectedCallback();
-    const path = this.route.path.substring(1);
-    const hasSupervisor = isComponentLoaded(this.hass, "hassio");
+    const path = this.route.path.substr(1);
 
-    this._redirect = getRedirect(path, hasSupervisor);
-
-    if (path.startsWith("supervisor") && this._redirect === undefined) {
-      if (!hasSupervisor) {
+    if (path.startsWith("supervisor")) {
+      if (!isComponentLoaded(this.hass, "hassio")) {
         this._error = "no_supervisor";
         return;
       }
@@ -267,14 +191,16 @@ class HaPanelMy extends LitElement {
       return;
     }
 
-    if (!this._redirect) {
+    const redirect = REDIRECTS[path];
+
+    if (!redirect) {
       this._error = "not_supported";
       return;
     }
 
     if (
-      this._redirect.component &&
-      !isComponentLoaded(this.hass, this._redirect.component)
+      redirect.component &&
+      !isComponentLoaded(this.hass, redirect.component)
     ) {
       this._error = "no_component";
       return;
@@ -282,17 +208,13 @@ class HaPanelMy extends LitElement {
 
     let url: string;
     try {
-      url = this._createRedirectUrl();
+      url = this._createRedirectUrl(redirect);
     } catch (err: any) {
       this._error = "url_error";
       return;
     }
 
-    if (this._redirect.navigate_outside_spa) {
-      location.assign(url);
-    } else {
-      navigate(url, { replace: true });
-    }
+    navigate(url, { replace: true });
   }
 
   protected render() {
@@ -317,16 +239,10 @@ class HaPanelMy extends LitElement {
             this.hass.localize(
               "ui.panel.my.component_not_loaded",
               "integration",
-              html`<a
-                target="_blank"
-                rel="noreferrer noopener"
-                href=${documentationUrl(
-                  this.hass,
-                  `/integrations/${this._redirect!.component!}`
-                )}
-              >
-                ${domainToName(this.hass.localize, this._redirect!.component!)}
-              </a>`
+              domainToName(
+                this.hass.localize,
+                REDIRECTS[this.route.path.substr(1)].component!
+              )
             ) || "This redirect is not supported.";
           break;
         case "no_supervisor":
@@ -349,31 +265,28 @@ class HaPanelMy extends LitElement {
     return html``;
   }
 
-  private _createRedirectUrl(): string {
-    const params = this._createRedirectParams();
-    return `${this._redirect!.redirect}${params}`;
+  private _createRedirectUrl(redirect: Redirect): string {
+    const params = this._createRedirectParams(redirect);
+    return `${redirect.redirect}${params}`;
   }
 
-  private _createRedirectParams(): string {
+  private _createRedirectParams(redirect: Redirect): string {
     const params = extractSearchParamsObject();
-    if (!this._redirect!.params && !Object.keys(params).length) {
+    if (!redirect.params && !Object.keys(params).length) {
       return "";
     }
     const resultParams = {};
-    for (const [key, type] of Object.entries(this._redirect!.params || {})) {
-      if (!params[key] && type.endsWith("?")) {
-        continue;
-      }
+    Object.entries(redirect.params || {}).forEach(([key, type]) => {
       if (!params[key] || !this._checkParamType(type, params[key])) {
         throw Error();
       }
       resultParams[key] = params[key];
-    }
+    });
     return `?${createSearchParam(resultParams)}`;
   }
 
   private _checkParamType(type: ParamType, value: string) {
-    if (type === "string" || type === "string?") {
+    if (type === "string") {
       return true;
     }
     if (type === "url") {

@@ -1,5 +1,5 @@
 import "@material/mwc-list/mwc-list-item";
-import "../components/ha-select";
+import "@material/mwc-select/mwc-select";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import { stopPropagation } from "../common/dom/stop_propagation";
@@ -18,7 +18,7 @@ class StateCardSelect extends LitElement {
   protected render(): TemplateResult {
     return html`
       <state-badge .stateObj=${this.stateObj}></state-badge>
-      <ha-select
+      <mwc-select
         .value=${this.stateObj.state}
         .label=${computeStateName(this.stateObj)}
         .disabled=${this.stateObj.state === UNAVAILABLE}
@@ -40,7 +40,7 @@ class StateCardSelect extends LitElement {
               </mwc-list-item>
             `
         )}
-      </ha-select>
+      </mwc-select>
     `;
   }
 
@@ -63,7 +63,7 @@ class StateCardSelect extends LitElement {
         margin-top: 10px;
       }
 
-      ha-select {
+      mwc-select {
         width: 100%;
       }
     `;
