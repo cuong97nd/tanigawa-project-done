@@ -9,8 +9,20 @@
 class WebRTCCamera extends HTMLElement {
   constructor() {
     super();
+    console.log("aaa", "constructor");
     this.subscriptions = [];
     this.unique_shortcuts_key = null;
+
+    this.pool = [];
+    var intervalID = setInterval(() => {
+      console.log("check", Date());
+      let cb = this.pool.pop();
+      cb && cb();
+    }, 1000);
+
+    setTimeout(() => {
+      clearInterval(intervalID);
+    }, 5000);
   }
 
   set status(value) {
@@ -306,7 +318,7 @@ class WebRTCCamera extends HTMLElement {
       }
     };
     pause.addEventListener("click", pauseCallback);
-    pause.addEventListener("touchstart", pauseCallback);
+    //pause.addEventListener("touchstart", pauseCallback);
     card.appendChild(pause);
 
     const volume = document.createElement("ha-icon");
@@ -316,7 +328,7 @@ class WebRTCCamera extends HTMLElement {
       video.muted = !video.muted;
     };
     volume.addEventListener("click", volumeCallback);
-    volume.addEventListener("touchstart", volumeCallback);
+    //volume.addEventListener("touchstart", volumeCallback);
     card.appendChild(volume);
 
     video.onvolumechange = () => {
@@ -336,7 +348,7 @@ class WebRTCCamera extends HTMLElement {
           : this.requestFullscreen();
       };
       fullscreen.addEventListener("click", fullscreenCallback);
-      fullscreen.addEventListener("touchstart", fullscreenCallback);
+      //fullscreen.addEventListener("touchstart", fullscreenCallback);
       this.onfullscreenchange = () => {
         fullscreen.icon = document.fullscreenElement
           ? "mdi:fullscreen-exit"
@@ -350,7 +362,7 @@ class WebRTCCamera extends HTMLElement {
           : this.webkitRequestFullscreen();
       };
       fullscreen.addEventListener("click", fullscreenCallback);
-      fullscreen.addEventListener("touchstart", fullscreenCallback);
+      //fullscreen.addEventListener("touchstart", fullscreenCallback);
       this.onwebkitfullscreenchange = () => {
         fullscreen.icon = document.webkitFullscreenElement
           ? "mdi:fullscreen-exit"
@@ -412,7 +424,7 @@ class WebRTCCamera extends HTMLElement {
         this.hass.callService(domain, name, element.service_data || {});
       };
       shortcut.addEventListener("click", shortcutCallback);
-      shortcut.addEventListener("touchstart", shortcutCallback);
+      //shortcut.addEventListener("touchstart", shortcutCallback);
       shortcuts.appendChild(shortcut);
     }
 
@@ -462,13 +474,15 @@ class WebRTCCamera extends HTMLElement {
     const buttons = ptz.querySelectorAll("ha-icon");
     buttons.forEach(function (el) {
       el.addEventListener("click", handlePTZ);
-      el.addEventListener("touchstart", handlePTZ);
+      //el.addEventListener("touchstart", handlePTZ);
     });
   }
 
   async renderGUI(hass) {
     const style = document.createElement("style");
     style.textContent = `
+            video::-webkit-media-controls-timeline {display:none;}
+
             ha-card {
                 display: flex;
                 justify-content: center;
@@ -816,7 +830,7 @@ class WebRTCCamera extends HTMLElement {
   }
 
   async connectedCallback() {
-    console.log("aaa", "connectedCallback");
+    console.log("aaa", "connectedCallback", Date());
 
     if (!this.config) return;
 
@@ -824,14 +838,16 @@ class WebRTCCamera extends HTMLElement {
       await this.renderGUI(this.hass);
     }
 
-    if (this.ws && this.config.background === true) return;
+    this.pool.push(async () => {
+      if (this.ws && this.config.background === true) return;
 
-    if (
-      !this.ws ||
-      [this.ws.CLOSING, this.ws.CLOSED].includes(this.ws.readyState)
-    ) {
-      await this.initMSE(this.hass);
-    }
+      if (
+        !this.ws ||
+        [this.ws.CLOSING, this.ws.CLOSED].includes(this.ws.readyState)
+      ) {
+        await this.initMSE(this.hass);
+      }
+    });
   }
 
   disconnectedCallback() {
