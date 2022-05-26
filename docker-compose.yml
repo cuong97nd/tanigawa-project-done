@@ -1,10 +1,10 @@
-version: '3'
+version: "3"
 services:
   recorder:
     build: node
     image: node-recorder:1.0
     environment:
-      - URL=rtsp://tanigawa:tanigawa@10.0.1.114:554/stream1
+      - URL=rtsp://tanigawa:tanigawa@10.0.1.115:554/stream1
       - SEGMENTTIME=90 #15 minutes
     volumes:
       - ./node:/app
@@ -16,6 +16,7 @@ services:
     container_name: homeassistant
     image: "ghcr.io/home-assistant/home-assistant:stable"
     volumes:
+      - ./frontend:/workspaces/frontend
       - ./config:/config
       - ./media:/media
       - /etc/localtime:/etc/localtime:ro
