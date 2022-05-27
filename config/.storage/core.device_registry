@@ -3,10 +3,11 @@
     "minor_version": 3,
     "key": "core.device_registry",
     "data": {
-        "devices": [],
-        "deleted_devices": [
+        "devices": [
             {
-                "config_entries": [],
+                "config_entries": [
+                    "0585a0601fbfc0bf28b0de508c8de99d"
+                ],
                 "connections": [
                     [
                         "mac",
@@ -15,13 +16,24 @@
                 ],
                 "identifiers": [
                     [
-                        "onvif",
-                        "B4:B0:24:CD:CB:2D"
+                        "tapo_control",
+                        "b4_b0_24_cd_cb_2d_tapo_control"
                     ]
                 ],
+                "manufacturer": "TP-Link",
+                "model": "C200",
+                "name": "Tapo_Camera_CB2D",
+                "sw_version": "1.1.17 Build 220107 Rel.10833n(4A50)",
+                "hw_version": null,
+                "entry_type": null,
                 "id": "16cde28f4e399b0aee5ad610fa502450",
-                "orphaned_timestamp": 1653475260.3898969
+                "via_device_id": null,
+                "area_id": null,
+                "name_by_user": null,
+                "disabled_by": null,
+                "configuration_url": null
             }
-        ]
+        ],
+        "deleted_devices": []
     }
 }

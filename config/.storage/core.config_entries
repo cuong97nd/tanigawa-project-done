@@ -29,6 +29,33 @@
                 "source": "import",
                 "unique_id": null,
                 "disabled_by": null
+            },
+            {
+                "entry_id": "0585a0601fbfc0bf28b0de508c8de99d",
+                "version": 8,
+                "domain": "tapo_control",
+                "title": "10.0.1.131",
+                "data": {
+                    "enable_motion_sensor": false,
+                    "enable_stream": false,
+                    "enable_time_sync": false,
+                    "ip_address": "10.0.1.131",
+                    "username": "tanigawa",
+                    "password": "tanigawa",
+                    "cloud_password": "",
+                    "enable_sound_detection": false,
+                    "sound_detection_peak": -50,
+                    "sound_detection_duration": 1,
+                    "sound_detection_reset": 10,
+                    "extra_arguments": "",
+                    "custom_stream": ""
+                },
+                "options": {},
+                "pref_disable_new_entities": false,
+                "pref_disable_polling": false,
+                "source": "user",
+                "unique_id": null,
+                "disabled_by": null
             }
         ]
     }

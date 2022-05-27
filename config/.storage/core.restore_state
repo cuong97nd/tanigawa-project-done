@@ -13,16 +13,44 @@
                     "user_id": "a7b2ecf6fb32483699b0f1b0114c42f7",
                     "friendly_name": "tanigawa"
                 },
-                "last_changed": "2022-05-27T17:07:37.212553+00:00",
-                "last_updated": "2022-05-27T17:07:39.868180+00:00",
+                "last_changed": "2022-05-27T17:11:13.642189+00:00",
+                "last_updated": "2022-05-27T17:11:14.334167+00:00",
                 "context": {
-                    "id": "01G437SVPWB58CGREG8AKM74RW",
+                    "id": "01G4380D4YH7GW00P6DCHGY4D2",
                     "parent_id": null,
                     "user_id": null
                 }
             },
             "extra_data": null,
-            "last_seen": "2022-05-27T17:09:28.554285+00:00"
+            "last_seen": "2022-05-27T17:31:07.173182+00:00"
+        },
+        {
+            "state": {
+                "entity_id": "update.camera_tapo_camera_cb2d",
+                "state": "off",
+                "attributes": {
+                    "auto_update": false,
+                    "installed_version": "1.1.17 Build 220107 Rel.10833n(4A50)",
+                    "in_progress": false,
+                    "latest_version": "1.1.17 Build 220107 Rel.10833n(4A50)",
+                    "release_summary": null,
+                    "release_url": null,
+                    "skipped_version": null,
+                    "title": "Tapo Camera: Tapo_Camera_CB2D",
+                    "entity_picture": "https://brands.home-assistant.io/_/tapo_control/icon.png",
+                    "friendly_name": "Camera - Tapo_Camera_CB2D",
+                    "supported_features": 17
+                },
+                "last_changed": "2022-05-27T17:14:55.055866+00:00",
+                "last_updated": "2022-05-27T17:14:55.055866+00:00",
+                "context": {
+                    "id": "01G43874PFBSWQBJV71AKQ6F3D",
+                    "parent_id": null,
+                    "user_id": null
+                }
+            },
+            "extra_data": null,
+            "last_seen": "2022-05-27T17:31:07.173182+00:00"
         },
         {
             "state": {

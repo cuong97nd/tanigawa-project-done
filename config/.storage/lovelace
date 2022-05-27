@@ -24,7 +24,26 @@
                                     "username": "a",
                                     "credential": "a"
                                 }
-                            ]
+                            ],
+                            "ptz": {
+                                "service": "tapo_control.ptz",
+                                "data_left": {
+                                    "entity_id": "camera.tapo_camera_cb2d_hd",
+                                    "pan": "LEFT"
+                                },
+                                "data_right": {
+                                    "entity_id": "camera.tapo_camera_cb2d_hd",
+                                    "pan": "RIGHT"
+                                },
+                                "data_up": {
+                                    "entity_id": "camera.tapo_camera_cb2d_hd",
+                                    "tilt": "UP"
+                                },
+                                "data_down": {
+                                    "entity_id": "camera.tapo_camera_cb2d_hd",
+                                    "tilt": "DOWN"
+                                }
+                            }
                         }
                     ]
                 }
