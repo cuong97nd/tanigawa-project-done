@@ -5,19 +5,6 @@
     "data": {
         "entries": [
             {
-                "entry_id": "557b5dd2c1293a37abcc65fd90305b43",
-                "version": 1,
-                "domain": "sun",
-                "title": "Sun",
-                "data": {},
-                "options": {},
-                "pref_disable_new_entities": false,
-                "pref_disable_polling": false,
-                "source": "import",
-                "unique_id": null,
-                "disabled_by": null
-            },
-            {
                 "entry_id": "a63f8579f5896c0895d7ae64f7843105",
                 "version": 1,
                 "domain": "webrtc",
@@ -27,6 +14,19 @@
                 "pref_disable_new_entities": false,
                 "pref_disable_polling": false,
                 "source": "user",
+                "unique_id": null,
+                "disabled_by": null
+            },
+            {
+                "entry_id": "16e82d9bab5e6d460298af100331cc07",
+                "version": 1,
+                "domain": "sun",
+                "title": "Sun",
+                "data": {},
+                "options": {},
+                "pref_disable_new_entities": false,
+                "pref_disable_polling": false,
+                "source": "import",
                 "unique_id": null,
                 "disabled_by": null
             }
