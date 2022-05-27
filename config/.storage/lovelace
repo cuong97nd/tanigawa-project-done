@@ -10,7 +10,7 @@
                     "cards": [
                         {
                             "type": "custom:webrtc-camera",
-                            "url": "rtsp://tanigawa:tanigawa@10.0.1.116:554/stream2",
+                            "url": "rtsp://tanigawa:tanigawa@10.0.1.131:554/stream2",
                             "mse": true,
                             "webrtc": true,
                             "ui": false,

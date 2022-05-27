@@ -1,0 +1,111 @@
+Fatal Python error: Segmentation fault
+
+Thread 0x00007f604c17db30 (most recent call first):
+  File "/usr/local/lib/python3.9/threading.py", line 1073 in _wait_for_tstate_lock
+  File "/usr/local/lib/python3.9/threading.py", line 1057 in join
+  File "/usr/src/homeassistant/homeassistant/util/executor.py", line 44 in join_or_interrupt_threads
+  File "/usr/src/homeassistant/homeassistant/util/executor.py", line 83 in join_threads_or_timeout
+  File "/usr/src/homeassistant/homeassistant/util/executor.py", line 68 in shutdown
+  File "/usr/local/lib/python3.9/asyncio/base_events.py", line 576 in _do_shutdown
+  File "/usr/local/lib/python3.9/threading.py", line 910 in run
+  File "/usr/local/lib/python3.9/threading.py", line 973 in _bootstrap_inner
+  File "/usr/local/lib/python3.9/threading.py", line 930 in _bootstrap
+
+Thread 0x00007f603f155b30 (most recent call first):
+  File "/usr/local/lib/python3.9/threading.py", line 316 in wait
+  File "/usr/local/lib/python3.9/threading.py", line 574 in wait
+  File "/usr/local/lib/python3.9/threading.py", line 1297 in run
+  File "/usr/local/lib/python3.9/threading.py", line 973 in _bootstrap_inner
+  File "/usr/local/lib/python3.9/threading.py", line 930 in _bootstrap
+
+Current thread 0x00007f6045dffb30 (most recent call first):
+  File "/usr/local/lib/python3.9/site-packages/matplotlib/font_manager.py", line 1092 in addfont
+  File "/usr/local/lib/python3.9/site-packages/matplotlib/font_manager.py", line 1068 in __init__
+  File "/usr/local/lib/python3.9/site-packages/matplotlib/font_manager.py", line 1441 in _load_fontmanager
+  File "/usr/local/lib/python3.9/site-packages/matplotlib/font_manager.py", line 1447 in <module>
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 850 in exec_module
+  File "<frozen importlib._bootstrap>", line 680 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 986 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1007 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1058 in _handle_fromlist
+  File "/usr/local/lib/python3.9/site-packages/matplotlib/textpath.py", line 8 in <module>
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 850 in exec_module
+  File "<frozen importlib._bootstrap>", line 680 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 986 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1007 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1058 in _handle_fromlist
+  File "/usr/local/lib/python3.9/site-packages/matplotlib/backend_bases.py", line 46 in <module>
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 850 in exec_module
+  File "<frozen importlib._bootstrap>", line 680 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 986 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1007 in _find_and_load
+  File "/usr/local/lib/python3.9/site-packages/matplotlib/contour.py", line 13 in <module>
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 850 in exec_module
+  File "<frozen importlib._bootstrap>", line 680 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 986 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1007 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1058 in _handle_fromlist
+  File "/usr/local/lib/python3.9/site-packages/matplotlib/colorbar.py", line 21 in <module>
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 850 in exec_module
+  File "<frozen importlib._bootstrap>", line 680 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 986 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1007 in _find_and_load
+  File "/usr/local/lib/python3.9/site-packages/matplotlib/pyplot.py", line 49 in <module>
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 850 in exec_module
+  File "<frozen importlib._bootstrap>", line 680 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 986 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1007 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1058 in _handle_fromlist
+  File "/usr/local/lib/python3.9/site-packages/scapy/extlib.py", line 22 in <module>
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 850 in exec_module
+  File "<frozen importlib._bootstrap>", line 680 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 986 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1007 in _find_and_load
+  File "/usr/local/lib/python3.9/site-packages/scapy/packet.py", line 49 in <module>
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 850 in exec_module
+  File "<frozen importlib._bootstrap>", line 680 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 986 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1007 in _find_and_load
+  File "/usr/local/lib/python3.9/site-packages/scapy/arch/linux.py", line 48 in <module>
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 850 in exec_module
+  File "<frozen importlib._bootstrap>", line 680 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 986 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1007 in _find_and_load
+  File "/usr/local/lib/python3.9/site-packages/scapy/arch/__init__.py", line 118 in <module>
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 850 in exec_module
+  File "<frozen importlib._bootstrap>", line 680 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 986 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1007 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1058 in _handle_fromlist
+  File "/usr/src/homeassistant/homeassistant/components/dhcp/__init__.py", line 404 in _start
+  File "/usr/local/lib/python3.9/concurrent/futures/thread.py", line 58 in run
+  File "/usr/local/lib/python3.9/concurrent/futures/thread.py", line 83 in _worker
+  File "/usr/local/lib/python3.9/threading.py", line 910 in run
+  File "/usr/local/lib/python3.9/threading.py", line 973 in _bootstrap_inner
+  File "/usr/local/lib/python3.9/threading.py", line 930 in _bootstrap
+
+Thread 0x00007f604f9eeab0 (most recent call first):
+  File "/usr/local/lib/python3.9/selectors.py", line 469 in select
+  File "/usr/local/lib/python3.9/asyncio/base_events.py", line 1869 in _run_once
+  File "/usr/local/lib/python3.9/asyncio/base_events.py", line 601 in run_forever
+  File "/usr/local/lib/python3.9/asyncio/base_events.py", line 634 in run_until_complete
+  File "/usr/src/homeassistant/homeassistant/runner.py", line 124 in run
+  File "/usr/src/homeassistant/homeassistant/__main__.py", line 191 in main
+  File "/usr/src/homeassistant/homeassistant/__main__.py", line 203 in <module>
+  File "/usr/local/lib/python3.9/runpy.py", line 87 in _run_code
+  File "/usr/local/lib/python3.9/runpy.py", line 197 in _run_module_as_main

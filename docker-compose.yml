@@ -1,25 +1,58 @@
 version: "3"
 services:
   recorder:
-    build: node
+    #build: node
     image: node-recorder:1.0
     environment:
-      - URL=rtsp://tanigawa:tanigawa@10.0.1.115:554/stream1
-      - SEGMENTTIME=90 #15 minutes
+      - TZ=Asia/Tokyo
+      - URL=rtsp://tanigawa:tanigawa@10.0.1.131:554/stream1
+      - SEGMENTTIME=900 #15 minutes
     volumes:
       - ./node:/app
       - ./media:/app/media
+      - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped
     privileged: true
+    
   homeassistant:
     container_name: homeassistant
-    image: "ghcr.io/home-assistant/home-assistant:stable"
+    image: "ghcr.io/home-assistant/home-assistant:2022.7.0.dev20220527"
     volumes:
+      - TZ=Asia/Tokyo
       - ./frontend:/workspaces/frontend
       - ./config:/config
       - ./media:/media
+      - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped
     privileged: true
+    network_mode: host
+    
+  ssh-to-docker-host:
+    image: jnovack/autossh
+    environment:
+      - SSH_REMOTE_USER=root
+      - SSH_REMOTE_HOST=118.27.118.210
+      - SSH_REMOTE_PORT=22
+      - SSH_TUNNEL_PORT=23
+      - SSH_TARGET_HOST=localhost
+      - SSH_TARGET_PORT=22
+    restart: always
+    volumes:
+      - ./id_rsa:/id_rsa
+    network_mode: host
+
+  ssh-to-lan-endpoint:
+    image: jnovack/autossh
+    environment:
+      - SSH_REMOTE_USER=root
+      - SSH_REMOTE_HOST=118.27.118.210
+      - SSH_REMOTE_PORT=22
+      - SSH_TUNNEL_PORT=8123
+      - SSH_TARGET_HOST=localhost
+      - SSH_TARGET_PORT=8123
+    restart: always
+    volumes:
+      - ./id_rsa:/id_rsa
     network_mode: host
